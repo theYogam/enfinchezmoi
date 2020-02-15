@@ -1,0 +1,429 @@
+{% extends 'enfinchezmoi/home.html' %}
+
+{% load static humanize auth_tokens webdesign i18n user_agents staticfiles media_from_provider  %}
+
+{% block page_title %}<title>{% blocktrans %}Owner ! Rent or sell your real estate - Enfinchezmoiii{% endblocktrans %}</title>{% endblock %}
+{% block head_style %}
+    {{ block.super }}
+{#    <link href="{% static 'ikwen/css/admin.css' %}?v=19.10.12" media="screen" rel="stylesheet" type="text/css" />#}
+    <link href="{% static 'enfinchezmoi/css/submit_ad.css' %}?v=19.12.19" media="screen" rel="stylesheet" type="text/css" />
+    <link rel='stylesheet' href="{% static 'ikwen/swiper/css/swiper.min.css' %}" />
+{% endblock %}
+{% block head_js %}
+    {{ block.super }}
+    <script src="{% static 'ikwen/swiper/js/swiper.jquery.min.js' %}"></script>
+    <script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
+
+{% endblock %}
+
+{% block content %}
+    <div>
+        {% block banner_top %}
+            <div  class="post-ad-header">
+                <div class="post-ad-container">
+                    {% block banner_top_header %}
+                        <h1 class="text-center center align-center">{% trans "Post your Ad" %}</h1>
+                    {% endblock %}
+                </div>
+            </div>
+        {% endblock %}
+        {% block content_body %}
+            <div class="col-md-offset-1" style="margin-bottom: 60px; clear:both;">
+                <form method="post">{% csrf_token %}
+                    <div class="col-md-offset-3 col-md-4">
+                        {% if form.errors %}
+                            <div class="errorlist">{{ form.errors }}</div>
+                        {% endif %}
+                        {% if form.errors %}<p class="alert alert-danger">{{ form.errors }}</p>{% endif %}
+
+                        {% if error %}<p class="alert alert-danger">{{ error }}</p>{% endif %}
+                        <div class="form-group">
+                            <label for="town">{% trans "Town :" %}</label>
+                            <select id="town" class="form-control" name="town">
+                                {% for town in town_list %}
+                                    <option {% if forloop.counter == 1 %}selected{% endif %}>{{ town }}</option>
+                                {% endfor %}
+                            </select>
+                             <div class="clearfix"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="area">{% trans "Area :" %}</label>
+                            <select id="area" class="form-control" name="area">
+                                {% for area in area_list %}
+                                    <option class="area-in-{{ area.town }} tpl">{{ area }}</option>
+                                {% endfor %}
+                            </select>
+                             <div class="clearfix"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>{% trans "Activity" %}</label>
+                            <select id="category" class="form-control" name="category">
+                                {% for category in category_list %}
+                                    {% if category.subcategory_set.all %}
+                                        <option {% if forloop.counter == 1 %}selected{% endif %} value="{{ category.slug }}">{{ category }}</option>
+                                    {% else %}
+                                        <option {% if forloop.counter == 1 %}selected{% endif %} value="none">{{ category }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>{% trans "Type of real estate" %}</label>
+                            <select id="subcategory" class="form-control" name="subcategory">
+                                {% for category in category_list %}
+                                    {% if category.subcategory_set.all %}
+                                        {% for subcategory in category.subcategory_set.all %}
+                                            <option class="subcategory-in-{{ subcategory.category.slug }} tpl">{{ subcategory }}</option>
+                                        {% endfor %}
+                                    {% else %}
+                                        <option class="subcategory-in-none tpl">--------------------</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="form-group" style="padding-right: 0;">
+                            <label for="surface-area">{% trans "Surface area :" %}</label>
+                            <div class="input-group">
+                                <input id="surface-area" type="number" value="30" step="5" class="form-control" name="surface_area">
+                                <div class="input-group-addon">
+                                    <span id="input-group-prepend" class="input-group-text">m<sup>2</sup></span>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="form-group" style="padding-right: 0;">
+                            <label for="bedroom-count">{% trans "Number of bed rooms :" %}</label>
+                            <input id="bedroom-count" type="number" value="1" step="1" class="form-control" name="bedroom_count">
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="form-group" style="padding-right: 0;">
+                            <label for="bathroom-count">{% trans "Number of bathrooms :" %}</label>
+                            <input id="bathroom-count" type="number" value="0" step="1" class="form-control" name="bathroom_count">
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="form-group" style="padding-right: 0;">
+                            <label for="kitchen-count">{% trans "Number of kitchens :" %}</label>
+                            <input id="kitchen-count" type="number" value="0" step="1" class="form-control" name="kitchen_count">
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="form-group" style="padding-right: 0;">
+                            <label for="saloon-count">{% trans "Number of saloons :" %}</label>
+                            <input id="saloon-count" type="number" value="0" step="1" class="form-control" name="saloon_count">
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="form-group">
+                            <h5>{% trans "Amenities" %}</h5>
+                            <div class="checkbox-inline col-sm-4 col-xs-12">
+                                <input type="checkbox" id="has-ac" name="has_ac" class="option custom-control-input">
+                                <label class="custom-control-label" for="has-ac">{% trans "AC" %}</label>
+                            </div>
+                            <div class="checkbox-inline col-sm-4 col-xs-12">
+                                <input type="checkbox" id="has-parking" name="has_parking" class="option custom-control-input">
+                                <label class="custom-control-label" for="has-parking">{% trans "Parking" %}</label>
+                            </div>
+                            <div class="checkbox-inline col-sm-4 col-xs-12">
+                                <input type="checkbox" id="has-safeguard" name="has_safeguard" class="option custom-control-input">
+                                <label class="custom-control-label" for="has-safeguard">{% trans "Safeguard" %}</label>
+                            </div>
+                            <div class="checkbox-inline col-sm-6 col-xs-12">
+                                <input type="checkbox" id="has-cleaning-service" name="has_cleaning_service" class="option custom-control-input">
+                                <label class="custom-control-label" for="has-cleaning-service">{% trans "Cleaning service" %}</label>
+                            </div>
+                            <div class="checkbox-inline col-sm-6">
+                                <input type="checkbox" id="is-furnished" name="is_furnished" class="option custom-control-input">
+                                <label class="custom-control-label" for="is-furnished">{% trans "Furnished"  %}</label>
+                            </div>
+                            <div class="checkbox-inline col-sm-6">
+                                <input type="checkbox" id="is-registered" name="is_registered" class="option custom-control-input">
+                                <label class="custom-control-label" for="is-registered">{% trans "Registered field"  %}</label>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="form-group" style="padding-right: 0;">
+                            <label for="cost">{% trans "Cost :" %}</label>
+                            <input id="cost" type="number" value="100000" step="500" class="form-control" name="cost">
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="form-group" style="padding-right: 0;">
+                            <label for="description">{% trans "Description :" %}</label>
+                            <textarea id="description" placeholder="Give a description of the place. It could be a story, or advices for customers " class="form-control" name="description"></textarea>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="form-group" style="padding-right: 0;">
+                            <label for="owner-email">{% trans "Owner email :" %}</label>
+                            <input id="owner-email" type="email" placeholder="sample@domain.com" class="form-control" name="owner_email">
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="form-group" style="padding-right: 0;">
+                            <label for="owner-phone">{% trans "Owner phone :" %}</label>
+                            <input id="owner-phone" type="text" class="form-control" name="owner_phone">
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="col-md-10 col-md-offset-1 col-md-pull-1">
+                        <input type="hidden" name="photos_ids" id="photos_ids" value=""/>
+                        <div id="post-photos" class="tab-pane active" role="tabpanel" style="padding-bottom: 90px">
+                            <label style="margin-left: 31.33%;">{% trans "Add pictures:" %}</label>
+                            <div id="upload-container" class="images-uploader">
+                                {% for photo in post.photos %}
+                                    <div class="frame image" id="{{ photo.id }}" style="background-image: url('{{ photo.image.small_url|from_provider:post.provider }}'); display: inline!important;">
+                                        <div class="delete has-shade" title="{% trans 'Delete image ?' %}">&times;</div>
+                                    </div>
+                                {% endfor %}
+                                <div class="frame image tpl">
+                                    <span class="progress"></span>
+                                    {% include 'core/snippets/spinner.html' %}
+                                    <div class="delete has-shade" title="{% trans 'Delete image' %}">&times;</div>
+                                </div>
+                                <div class="frame uploader" style="margin: 0 auto; float: none;"></div>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                    <div class="form-row col-md-offset-3 col-md-4 submit-ad-container">
+                        <button role="button" class="btn btn-primary btn-block submit-ad">{% trans "Submit" %}</button>
+                    </div>
+                </form>
+            </div>
+        {% endblock %}
+    </div>
+    <div class="clearfix"></div>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src="{% static 'ikwen/ajaxuploader/js/fileuploader.js' %}"></script>
+
+    <script>
+        (() => {
+            let subcategory = ".subcategory-in-" + $("[id^='category']").val(), area = ".area-in-" + $("[id^='town']").val();
+            initial_subcategory_list(subcategory);
+            initial_subcategory_list(area);
+            $("[id^='category']").on({
+                change: function (){
+                    select_matching_subcategory_list(this);
+                }
+            });
+            $("[id^='town']").on({
+                change: function (){
+                    select_matching_area_list(this);
+                }
+            });
+            function initial_subcategory_list(subcategory) {
+                $(subcategory).each(function (i, element) {
+                    if(i===0){
+                        let first_value = $(element).val();
+                        $(element).parent().val(first_value);
+                    }
+                    $(element).removeClass('tpl');
+                });
+            }
+
+            function select_matching_subcategory_list(arg) {
+                let subcategory = ".subcategory-in-" + $(arg).val();
+                $("[class^='subcategory']:not(subcategory)").each(function (i, element) {
+                    $(element).addClass('tpl');
+                });
+                initial_subcategory_list(subcategory);
+            }
+
+            function select_matching_area_list(arg){
+                let area = ".area-in-" + $(arg).val();
+                $("[class^='area']:not(area)").each(function (i, element) {
+                    $(element).addClass('tpl');
+                });
+                initial_subcategory_list(area);
+            }
+
+
+
+            $('div#admin-nav .posts').addClass('active');
+            $('.form-row').addClass('form-group');
+            $('.form-row input, .form-row select, .form-row textarea').addClass('form-control input-sm');
+            $('.form-row textarea').addClass('form-control input-sm');
+
+            {% if request.GET.name %}
+                $('#id_name').val("{{ request.GET.name }}");
+            {% endif %}
+            $('div#upload-container').on('click', '.image .delete', function() {
+                var postId = $('#post-id').val(),
+                    $photo = $(this).parent(),
+                    id = $photo.attr('id'),
+                    photosIDs = $('#photos_ids').val();
+                photosIDs = photosIDs.replace(id, '');
+                $('#photos_ids').val(photosIDs);
+                $photo.fadeOut('normal', function() {
+                    $(this).remove()
+                });
+                var post = getLocalPost(), photos;
+                if (post.photos) photos = post.photos;
+                else photos = [];
+                post.photos = [];
+                for (var i=0; i<photos.length; i++) {
+                    var photo = photos[i];
+                    if (photo.id != id) post.photos.push(photo)
+                }
+                localStorage.setItem('post', JSON.stringify(post));
+                $.getJSON('', {action: 'delete_photo', photo_id: $photo.attr('id'), post_id: postId});
+            });
+            $('form#submit-post').on('change', 'input, textarea', function() {
+                var post = getLocalPost();
+                localStorage.setItem('post', JSON.stringify(post));
+            }).submit(function() {
+                var isCorrect = checkInput();
+                if (isCorrect) localStorage.removeItem('post');
+                return isCorrect;
+            });
+            var pageLoading = true,
+                post;
+            function getLocalPost() {
+                post = localStorage.getItem('post') ? JSON.parse(localStorage.getItem('post')):{};
+                if (pageLoading) {
+                    // Do not override locally saved post with form data upon page loading
+                    pageLoading = false;
+                    return post
+                }
+                var photos = [];
+                if (post != {} && post.photos) photos = post.photos; //Keep a copy of photos objects
+                var postAsArray = $('form#submit-post').serialize().split('&');
+                for (var i=0; i<postAsArray.length; i++) {
+                    var elt = postAsArray[i].split('=');
+                    post[elt[0]] = decodeURIComponent(elt[1]).replace(/\+/g, ' ');
+                }
+                post.photos = photos; //Then restore the photos objects on the update serialized form
+                return post
+            }
+            function checkInput() {
+                var check = true;
+                $('input.required').each(function() {
+                    if (!(this).val()) {
+                        ikwen.showFloatingNotice("{% trans "Missing information. Please check." %}", '', 6);
+                        $(this).addClass('verify');
+                        check = false;
+                    }
+                });
+                var photosIDs = $('#photos_ids').val().replace(',', '');
+                if (!photosIDs) {
+                    return confirm("{% trans "Product without photos will be automatically hidden. Continue ?" %}");
+                }
+                return check;
+            }
+            var uploader = new qq.FileUploader({
+                action: "{% url 'enfinchezmoi:post_photo_uploader' %}",
+                element: $('div#upload-container .uploader')[0],
+                buttonText: "+",
+                multiple: false,
+                onSubmit: function(id, fileName) {
+                    var uploadId = 'u' + id;
+                    $('div#upload-container .image.tpl').clone().removeClass('tpl').addClass('loading ' + uploadId).insertBefore('div#upload-container .image.tpl');
+                },
+                onProgress: function(id, fileName, loaded, total) {
+                    var ratio = loaded / total,
+                        percent = ratio * 100,
+                        uploadId = 'u' + id;
+                    $('div#upload-container .image.loading.' + uploadId + ' .progress').animate({opacity: 1 - ratio, width: percent + '%'});
+                    if (ratio === 1) $('div#upload-container .image.loading.' + uploadId + ' .spinner').show()
+                },
+                onComplete: function(id, fileName, responseJSON) {
+                    if(responseJSON.success) {
+                        var uploadId = 'u' + id,
+                            photo = {id: responseJSON.id, url: responseJSON.url},
+                            photosIDs = $('#photos_ids').val(),
+                            img = new Image(),
+                            post = getLocalPost();
+                        $('div#upload-container .image.loading.' + uploadId).attr('id', photo.id);
+                        img.onload = function() {
+                            $('div#upload-container .image.loading.' + uploadId).removeClass('loading').css('background-image', "url('" + photo.url +"')")
+                                .find('.progress, .spinner').remove();
+                        };
+                        img.src = photo.url;
+                        post.photos_IDs = photosIDs + ',' + photo.id;
+                        $('#photos_ids').val(post.photos_IDs);
+                        post.photos.push(photo);
+                        localStorage.setItem('post', JSON.stringify(post));
+                    } else {
+                        alert("upload failed!");
+                    }
+                },
+                params: {
+                    'csrf_token': '{{ csrf_token }}',
+                    'csrf_name': 'csrfmiddlewaretoken',
+                    'csrf_xname': 'X-CSRFToken',
+                    'post_id': '{{ post.id }}'
+                }
+            });
+            {% if post %}
+                $('#photos_ids').val("{{ post.get_photos_ids_list }}");
+                localStorage.removeItem('post');
+            {% else %}
+                post = getLocalPost();  // Post from an unterminated submit
+                if (post) {
+                    $('#id_town').val(post.town);
+                    $('#id_area').val(post.area);
+                    $('#id_category').val(post.category);
+                    $('#id_subcategory').val(post.subcategory);
+                    $('#id_description').val(post.description);
+                    $('#id_bathroom_count').val(post.bathroom_count);
+                    $('#id_bedroom_count').val(post.bedroom_count);
+                    $('#id_kitchen_count').val(post.kitchen_count);
+                    $('#id_saloon_count').val(post.saloon_count);
+                    $('#id_has_ac').val(post.has_ac);
+                    $('#id_has_parking').val(post.retail_price);
+                    $('#id_has_parking').val(post.retail_price);
+                    $('#id_has_parking').val(post.retail_price);
+                    $('#id_is_furnished').val(post.retail_price);
+                    $('#id_max_price').val(post.is_furnished);
+                    $('#id_packing_price').val(post.packing_price);
+                    $('#id_size').val(post.size);
+                    $('#id_weight').val(post.weight);
+                    $('#id_stock').val(post.stock);
+                    $('#id_unit_of_measurement').val(post.unit_of_measurement);
+                    $('#id_min_order').val(post.min_order);
+                    $('#id_visible').prop('checked', post.visible);
+                    if (post.photos) {
+                        var photosIDs = '';
+                        for (var i=0; i<post.photos.length; i++) {
+                            var $photo = $('div#upload-container .image.tpl').clone().removeClass('tpl'),
+                                photo = post.photos[i];
+                            $photo.attr('id', photo.id);
+                            photosIDs += ',' + photo.id;
+                            $photo.insertBefore('div#upload-container .uploader');
+                            $photo.css('background-image', "url('" + photo.url +"')");
+                        }
+                        $('#photos_ids').val(photosIDs.substr(1));
+                    }
+                }
+            {% endif %}
+
+            {% if request.GET.name %}
+                $('#id_name').val("{{ request.GET.name }}");
+            {% endif %}
+
+            {# BEGIN: Separate form accross tabs: Order is important as they are stacked LIFO #}
+
+            $('.field-retail_price_is_modifiable').prependTo('#post-pricing');
+            $('.field-packing_price').prependTo('#post-pricing');
+            $('.field-max_price').prependTo('#post-pricing');
+            $('.field-retail_price').prependTo('#post-pricing');
+            $('.field-wholesale_price').prependTo('#post-pricing');
+
+            $('.field-visible').prependTo('#post-management');
+            $('.field-unit_of_measurement').prependTo('#post-management');
+            $('.field-min_order').prependTo('#post-management');
+            $('.field-stock').prependTo('#post-management');
+            $('.field-original_id').prependTo('#post-management');
+            $('.field-reference').prependTo('#post-management');
+
+            {# END #}
+
+            {% if messages %}
+                {% for msg in messages %}ikwen.showFloatingNotice('{{ msg|safe }}', '{{ msg.tags }}', 6);{% endfor %}
+            {% endif %}
+        })();
+    </script>
+
+{% endblock %}

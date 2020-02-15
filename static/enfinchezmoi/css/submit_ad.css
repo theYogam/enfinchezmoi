@@ -1,0 +1,16 @@
+.images-uploader .frame {height: 200px;float: left;margin: 0 10px 10px 0;overflow: hidden;width: 100%;}
+.images-uploader .image {background: no-repeat center;border: solid 1px #DBE6FF;margin-right: 10px;}
+.images-uploader .image .delete {background: #FFF; border-bottom-left-radius: 10px; color: #ef0202; cursor: pointer; font-size: 15px; font-weight: bold; float: right; padding: 2px  9px}
+.images-uploader .image.loading .delete {display: none}
+.images-uploader .image .progress {background: #3C63FF; height: 100%}
+.images-uploader .uploader {background: url('../img/no_photo.png') center no-repeat; background-size: cover;
+    border: solid 1px #eee; font: bold 48px Arial; text-align: center}
+.images-uploader .qq-upload-button {background: none;border: none;box-shadow: none;color: #666;text-shadow: none;line-height: 200px;width: 100%;}
+.images-uploader .qq-upload-button-hover {box-shadow: none; color: #fff}
+
+
+
+@media (min-width: 768px) {
+    .images-uploader .frame {width: 235px;height: 190px;}
+    .images-uploader .qq-upload-button {line-height: 190px}
+}

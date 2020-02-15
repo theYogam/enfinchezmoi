@@ -1,0 +1,652 @@
+{% extends 'core/base_bs.html' %}
+{% load static humanize auth_tokens webdesign i18n user_agents staticfiles %}
+
+{#media_from_provider#}
+{% block meta %}
+{#    {{ block.super }}#}
+    {% include 'core/snippets/colors_and_icons.html' %}
+    <meta property="og:url" content="http://www.enfinchezmoiii.com" />
+    <meta property="og:image" content="{% static 'enfinchezmoi/img/logo_enfinchezmoiii_rouge_sur_blanc.png' %}" />
+    <meta property="og:title" content="{% trans "Enfinchezmoiii - Real estate agency " %}"/>
+    <meta property="og:description" content="{% trans "An online platform for ads and deposits of real estate in Cameroon." %}">
+    <meta property="description" content="{% trans "An online platform for ads and deposits of real estate in Cameroon." %}" />
+{% endblock %}
+
+{#{% block page_title %}<title>Enfinchezmoiii - {{ config.slogan }}</title>{% endblock %}#}
+{% block page_title %}<title>{% trans "Enfinchezmoiii - Real estate agency - Home" %}</title>{% endblock %}
+
+{% block head_style %}
+    {{ block.super }}
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'enfinchezmoi/css/enfinchezmoi.css' %}">
+    <link rel="stylesheet" href="{% static 'ikwen/swiper/css/swiper.min.css' %}">
+    <link rel="stylesheet" href="{% static 'daraja/css/daraja.css' %}">
+
+    <!-- Demo styles -->
+  <style>
+    html, body {
+      position: relative;
+      height: 100%;
+    }
+    body {
+      {#background: #eee;#}
+      font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      {#color:#000;#}
+      margin: 0;
+      padding: 0;
+    }
+    .swiper-container {
+      width: 100%;
+      height: 100%;
+    }
+    .swiper-slide {
+      text-align: center;
+      font-size: 18px;
+      background: #fff;
+
+      /* Center slide text vertically */
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: -webkit-flex;
+      display: flex;
+
+      -webkit-box-pack: center;
+      -ms-flex-pack: center;
+      -webkit-justify-content: center;
+      justify-content: center;
+      -webkit-box-align: center;
+      -ms-flex-align: center;
+      -webkit-align-items: center;
+      align-items: center;
+    }
+  </style>
+
+{% endblock %}
+
+
+{% block header %}
+    {% with collaborates_on=user.collaborates_on %}
+        {% url "ikwen:account_setup" as account_setup_url %}
+        <nav id="navbar" class="navbar navbar-default navbar-static-top">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <div class="container-fluid">
+                        <i class="glyphicon glyphicon-menu-left back"></i>
+                        <div class="menu-button">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </div>
+                        {% block header_brand %}
+                            <a class="navbar-brand hidden-xs" href="{{ service.url }}">
+                                <strong>{{ service.project_name }}</strong>
+                            </a>
+                            <a href="{% url 'enfinchezmoi:submit_ad' %}" role="button" class="post-ad btn btn-primary btn-md hidden-xs pull-right" style="-webkit-border-radius: 25px;-moz-border-radius: 25px;border-radius: 25px;"><i class="fas fa-plus-circle"></i>&nbsp;&nbsp;{% trans "Post an Ad"%} </a>
+                        {% endblock %}
+                        {% block site_menu_xs %}
+                            <nav class="visible-xs pull-right">
+                                <ul id="nav-xs" class="nav navbar-nav navbar-right">
+                                    <li class="show-search">
+                                        <a>
+                                            <i class="glyphicon glyphicon-search"></i>
+                                        </a>
+                                    </li>
+                                    {% if user.is_authenticated %}
+                                        {% if collaborates_on|length >= 1 %}
+                                            <li class="dropdown">
+                                                <a id="apps-xs" class="dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="glyphicon glyphicon-th-large"></i>
+                                                </a>
+                                                <ul class="dropdown-menu" aria-labelledby="apps-xs" style="right: -39px">
+                                                    {% for app in collaborates_on %}
+                                                        <li><a href="{{ app.admin_url }}">{{ app.project_name }}</a></li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </li>
+                                        {% endif %}
+                                        <li class="home">
+                                            <a href="{{ settings.IKWEN_CONSOLE_URL }}">
+                                                <i class="glyphicon glyphicon-bell" aria-hidden="true"></i>
+                                                {% if user.get_notice_count > 0 %}
+                                                    {% if user.get_notice_count >= 100 %}
+                                                        <span class="label label-danger">99+</span>
+                                                    {% else %}
+                                                        <span class="label label-danger">{{ user.get_notice_count }}</span>
+                                                    {% endif %}
+                                                {% endif %}
+                                            </a>
+                                        </li>
+                                        <li class="dropdown">
+                                            <a id="user-menu-xs" class="dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <i class="glyphicon glyphicon-user"></i>
+                                            </a>
+                                            <ul class="dropdown-menu" aria-labelledby="user-menu-xs">
+                                                <li style="padding: 3px 20px"> {{ user.get_short_name }} </li>
+                                                <li role="separator" class="divider"></li>
+                                                <li>
+                                                    <a href="{{ account_setup_url|ikwenize }}">{% trans "Account setup" %}</a>
+                                                </li>
+                                                <li><a href="{% url 'ikwen:staff_router' %}">{% trans "Admin" %}</a> </li>
+                                                <li><a href="{% url "ikwen:logout" %}">{% trans "Logout" %}</a> </li>
+                                            </ul>
+                                        </li>
+
+                                    {% else %}
+                                        <li>
+                                            <a class="pull-left" href="{% url 'ikwen:sign_in' %}?next={% url 'home' %}">{% trans "Login" %}</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endblock %}
+                    </div>
+                </div>
+
+{#                <div id="navbar-search" class="navbar-form navbar-left">#}
+{#                    <form id="search" autocomplete="off" onsubmit="return false">#}
+{#                        <i class="glyphicon glyphicon-menu-left hide-search visible-xs"></i>#}
+{#                        <i class="glyphicon glyphicon-search hidden-xs"></i>#}
+{#                        <input type="text" name="radix" class="form-control input-md" placeholder="{% trans "Search ikwen" %}">#}
+{#                        <input type="hidden" name="q">#}
+{#                        <span class="spinner" style="display: none"></span>#}
+{#                    </form>#}
+{#                    <div id="navbar-results" style="display: none" data-min-search-chars="2">#}
+{#                        <div class="stage">#}
+{#                            {% include 'core/snippets/spinner.html' %}#}
+{#                            <ul style="float: left; padding-left: 0; width: 100%">#}
+{#                                <li class="ik-li tpl" style="display: none">#}
+{#                                    <a class="target_url" style="display: block">#}
+{#                                        <span class="image rounded photo logo bg-img" style="background-image: url({% static 'ikwen/img/no_photo.png' %})"></span>#}
+{#                                        <div class="info">#}
+{#                                             <div class='full_name project_name has-faded-edge'></div>#}
+{#                                            <p class="about short_description minor-tag"></p>#}
+{#                                        </div>#}
+{#                                        <div class="clearfix"></div>#}
+{#                                    </a>#}
+{#                                </li>#}
+{#                            </ul>#}
+{#                            <div class="clearfix"></div>#}
+{#                        </div>#}
+{#                        <div class="clearfix"></div>#}
+{#                    </div>#}
+{#                </div>#}
+                {% block site_menu %}
+                    <div id="site-menu" class="hidden-xs collapse navbar-collapse">
+                        <div class="col-md-6 navbar-menu">
+                            <nav class="hidden-xs col-lg-offset-1 col-sm-offset-1">
+                                <ul id="nav-xs" class="nav navbar-nav">
+                                    {% if category_list %}
+                                        {% for category in category_list %}
+                                            <li class="dropdown">
+                                                <a class="dropdown-toggle" id="apps-xs" href="{% url 'enfinchezmoi:show_post_list' category.slug %}" aria-haspopup="true" aria-expanded="false">
+                                                   {{ category.name }} <i class="fas fa-angle-down"></i>
+                                                </a>
+                                                <ul class="dropdown-menu dropdown-content" aria-labelledby="apps-xs">
+                                                    {% if category.subcategory_set.all %}
+                                                        {% for sub_category in category.subcategory_set.all %}
+                                                            <li><a href="{% url 'enfinchezmoi:show_post_list' category.slug sub_category.slug %}">{{ sub_category.name }}</a></li>
+                                                        {% endfor %}
+                                                    {% endif %}
+                                                </ul>
+                                            </li>
+                                        {% endfor %}
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                        <div class="container-fluid">
+                            <ul class="nav navbar-nav navbar-right">
+                                {% if user.is_authenticated %}
+                                    {% if collaborates_on|length == 1 %}
+                                        <li id="user-apps" class="visible-lg">
+                                            <a href="{{ collaborates_on.0.admin_url }}">{{ collaborates_on.0.project_name }}</a>
+                                        </li>
+                                    {% endif %}
+                                    {% if collaborates_on|length >= 1 %}
+                                        <li id="user-apps" class="dropdown{% if collaborates_on|length == 1 %} hidden-lg{% endif %}">
+                                            <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <i class="glyphicon glyphicon-th-large"></i>
+                                            </a>
+                                            <ul class="dropdown-menu" aria-labelledby="apps">
+                                                {% for app in collaborates_on %}
+                                                    <li><a href="{{ app.admin_url }}">{{ app.project_name }}</a></li>
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+                                    {% endif %}
+                                    <li id="user-home">
+                                        <a href="{{ settings.IKWEN_CONSOLE_URL }}">
+                                            <i class="glyphicon glyphicon-bell"></i>
+                                            {% if user.get_notice_count > 0 %}
+                                                {% if user.get_notice_count >= 100 %}
+                                                    <span class="label label-danger">99+</span>
+                                                {% else %}
+                                                    <span class="label label-danger">{{ user.get_notice_count }}</span>
+                                                {% endif %}
+                                            {% endif %}
+                                        </a>
+                                    </li>
+                                    <li id="user-menu" class="dropdown">
+                                        <a class="icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="glyphicon glyphicon-user"></i>
+                                        </a>
+                                        <ul class="dropdown-menu" aria-labelledby="user-menu">
+                                            <li style="padding: 3px 20px"> {{ user.get_short_name }} </li>
+                                            <li role="separator" class="divider"></li>
+                                            <li>
+                                                <a href="{{ account_setup_url|ikwenize }}">{% trans "Account setup" %}</a>
+                                            </li>
+                                            {% if user.is_staff %}<li><a href="{% url 'ikwen:staff_router' %}">{% trans "Admin" %}</a></li>{% endif %}
+                                            <li><a href="{% url "ikwen:logout" %}">{% trans "Logout" %}</a> </li>
+                                        </ul>
+                                    </li>
+                                {% else %}
+                                    <li class="hidden-xs">
+                                        <a href="{% url 'ikwen:sign_in' %}?next={% url 'home' %}" class="cta">{% trans "Login" %}</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endblock %}
+            </div>
+        </nav>
+    {% endwith %}
+{% endblock %}
+
+
+{% block content %}
+{#    <video  autoplay loop muted id="home-page-bg">#}
+{#        <source src="{% static 'enfinchezmoi/video/aladji.mp4' %}" type="video/mp4">#}
+{#    </video>#}
+    <div style="font-family: 'Lato', sans-serif">
+        <div class="banner-top">
+            <div class="container">
+                <div class="col-md-8 centered-container">
+                    <div class="search-header">
+                        <h2 class="hidden-xs text-has-shade">{% trans "Search a house that suits your needs !" %}</h2>
+                        <ul class="nav nav-tabs" id="search-tab" role="tablist">
+                            <li class="nav-item active">
+                                <a class="navbar-link" id="rent-tab" data-toggle="tab" href="#rent" role="tab" aria-controls="rent" aria-selected="true">{% trans "Rent" %}</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="navbar-link" id="purchase-tab" data-toggle="tab" href="#purchase" role="tab" aria-controls="purchase" aria-selected="false">{% trans "Purchase" %}</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="navbar-link" id="estimate-tab" data-toggle="tab" href="#estimate" role="tab" aria-controls="estimate" aria-selected="false">{% trans "Estimate" %}</a>
+                            </li>
+                        </ul>
+                        <div class="search-body">
+                            <div class="tab-content" id="tab-content">
+                                <div class="tab-pane fade active in" id="rent" role="tabpanel" aria-labelledby="rent-tab">
+                                    <form action="{% url 'enfinchezmoi:show_post_list' %}" >
+                                        <div class="form-row">
+                                            <div class="form-group col-lg-4 col-md-6 col-xs-12">
+                                                <label for="town-rent">{% trans "Town :" %}</label>
+                                                <select id="town-rent" class="form-control" name="town_rent">
+                                                    {% for town in town_list %}
+                                                        {% if town.area_set.all %}
+                                                            <option {% if forloop.counter == 1 %}selected{% endif %} value="{{ town.slug }}">{{ town }}</option>
+                                                        {% else %}
+                                                            <option {% if forloop.counter == 1 %}selected{% endif %} value="none">{{ town }}</option>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-lg-4 col-md-6 col-xs-12">
+                                                <label for="area-rent">{% trans "Area :" %}</label>
+                                                <select id="area-rent" class="form-control" name="area_rent">
+                                                    {% for town in town_list %}
+                                                        {% if town.area_set.all %}
+                                                            {% for area in town.area_set.all %}
+                                                                <option class="area-in-{{ area.town.slug }} tpl">{{ area }}</option>
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            <option class="area-in-none tpl">-----------------</option>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-lg-4 col-xs-12">
+                                                <label for="max-budget-rent">{% trans "Maximum budget :" %}</label>
+                                                <div class="input-group">
+                                                    <div class="input-group-addon">
+                                                        <span id="input-group-prepend" class="input-group-text">XAF</span>
+                                                    </div>
+                                                    <input id="max-budget-rent" type="number" value="" step="5000" class="form-control" name="max_budget_rent">
+                                                </div>
+                                            </div>
+                                            <div class="clearfix"></div>
+                                        </div>
+                                        <div class="form-group">
+                                            {% for category in category_list %}
+                                                {% if category.slug == "rental" or category.slug == "location" %}
+                                                    {% for subcategory in category.subcategory_set.all %}
+                                                        <div class="checkbox-inline col-md-4 col-xs-12 text-left">
+                                                            <input type="checkbox" id="custom-check{{ forloop.counter }}" name="{{ subcategory }}" class="rental-checkbox custom-control-input">
+                                                            <label class="custom-control-label" for="custom-check{{ forloop.counter }}">{{ subcategory }}</label>
+                                                        </div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            {% endfor %}
+                                            <div class="clearfix"></div>
+                                        </div>
+                                        <div class="owner-request text-center">
+                                            <a href="{% url 'enfinchezmoi:submit_ad' %}" onclick="{% if not request.user.is_authenticated %}$('.login-message-error').show();return false;{% endif %}">{% trans "Are you a real estate owner ? Post an ad" %}</a>
+                                            <h5 class="tpl login-message-error">{% trans "Please, log in to perform this action" %}</h5>
+                                        </div>
+                                        <div class="form-row col-sm-6 col-xs-12 search-house-container">
+                                            <button class="btn btn-primary btn-block search-house">{% trans "Search" %}</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="tab-pane fade" id="purchase" role="tabpanel" aria-labelledby="purchase-tab">
+                                    <form action="{% url 'enfinchezmoi:show_post_list' %}" >
+                                        <div class="form-row">
+                                            <div class="form-group col-lg-4 col-md-6">
+                                                <label for="town-purchase">{% trans "Town :" %}</label>
+                                                <select id="town-purchase" class="form-control" name="town_purchase">
+                                                    {% for town in town_list %}
+                                                        {% if town.area_set.all %}
+                                                            <option {% if forloop.counter == 1 %}selected{% endif %} value="{{ town.slug }}">{{ town }}</option>
+                                                        {% else %}
+                                                            <option {% if forloop.counter == 1 %}selected{% endif %} value="none">{{ town }}</option>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-lg-4 col-md-6">
+                                                <label for="area-purchase">{% trans "Area :" %}</label>
+                                                <select id="area-purchase" class="form-control" name="area_purchase">
+                                                    {% for town in town_list %}
+                                                        {% if town.area_set.all %}
+                                                            {% for area in town.area_set.all %}
+                                                                <option class="area-in-{{ area.town.slug }} tpl">{{ area }}</option>
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            <option class="area-in-none tpl">-----------------</option>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-lg-4 col-xs-12">
+                                                <label for="max-budget-purchase">{% trans "Maximum budget :" %}</label>
+                                                <div class="input-group">
+                                                    <div class="input-group-addon">
+                                                        <span id="input-group-prepend" class="input-group-text">XAF</span>
+                                                    </div>
+                                                    <input id="max-budget-purchase" type="number" value="" step="5000" class="form-control" name="max_budget_purchase">
+                                                </div>
+                                            </div>
+                                            <div class="clearfix"></div>
+                                        </div>
+                                        <div class="form-group">
+                                            {% for category in category_list %}
+                                                {% if category.slug == "sales" or category.slug == "ventes" %}
+                                                    {% for subcategory in category.subcategory_set.all %}
+                                                        <div class="checkbox-inline col-md-4 col-xs-12 text-left">
+                                                            <input type="checkbox" id="custom-check{{ forloop.counter }}" name="{{ subcategory }}" class="sales-checkbox custom-control-input">
+                                                            <label class="custom-control-label" for="custom-check{{ forloop.counter }}">{{ subcategory }}</label>
+                                                        </div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            {% endfor %}
+                                            <div class="clearfix"></div>
+                                        </div>
+                                        <div class="form-row col-sm-6 col-xs-12 search-house-container">
+                                            <button class="btn btn-primary btn-block search-house">{% trans "Search" %}</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="tab-pane fade" id="estimate" role="tabpanel" aria-labelledby="estimate-tab">
+                                    <form action="{% url 'enfinchezmoi:show_post_list' %}" >
+                                        <div class="form-group">
+                                            <label for="place">{% trans "Address" %}</label>
+                                            <select id="input-address" class="form-control" name="address">
+                                                {% for area in area_list %}
+                                                    <option {% if forloop.counter == 1 %}selected{% endif %} value="{{ area }}">{{ area }}, {{ area.town }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <div class="clearfix"></div>
+                                        </div>
+                                        <div class="form-row col-sm-6 col-xs-12 continue-estimation-container" style="float: none; margin: 5vh auto auto;">
+                                            <button class="btn btn-primary btn-block continue-estimation">{% trans "Continue" %}</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div>
+             <div id="content" class="container">
+                <h1 class="text-center align-center trending-post">{% trans "Trending" %}</h1>
+                {% for category in category_list %}
+                    <div>
+                        {% if category.subcategory_set.all %}
+                            {% for subcategory in category.subcategory_set.all %}
+                                {% for post in post_list %}
+                                    {% if post.subcategory == subcategory %}
+                                        <div class="col-md-4" style="padding-bottom: 50px">
+                                            <div class="post">
+                                                <a class="" href="{% url 'enfinchezmoi:post_detail' post.subcategory.category.slug post.subcategory.slug post.area.slug post.id %}">
+                                                    {% if post.photos %}
+                                                        <!-- Swiper -->
+                                                        <div class="swiper-container">
+                                                            <div class="swiper-wrapper">
+                                                                {% for photo in post.photos %}
+                                                                <div class="item-image swiper-slide" style="background-image: url({{ photo.image.url }});"></div>
+                                                                {% endfor %}
+                                                            </div>
+                                                            <!-- Add pagination -->
+                                                            <div class="swiper-pagination"></div>
+                                                        </div>
+                                                    {% endif %}
+                                                </a>
+                                                <h3>{{ post.subcategory }}</h3>
+                                                <h4 class="rooms">{% if post.room_count > 0 %}{{ post.room_count }} {% trans "room(s)" %} &bullet; {% endif %}{% if post.bedroom_count > 0 %}{{ post.bedroom_count }} {% trans "bedroom(s)" %} &bullet; {% endif %}{% if post.bathroom_count > 0 %}{{ post.bathroom_count }} {% trans "bathroom(s)" %} &bullet; {% endif %}{% if post.surface_area %}{{ post.surface_area }} m<sup>2</sup>{% endif %}</h4>
+                                                <p class="company-description">
+                                                    {{ post.description|truncatewords:30|safe }}
+                                                </p>
+                                                <div class="post-cost hidden-xs" data-post-cost="{{ post.cost }}"><span class="cost" style="font-size: 2.2vw; font-weight: 900;"></span><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;XAF{% if post.subcategory.name == 'Terrain' or post.subcategory == 'Field'  %}/m<sup>2</sup>{% endif %}</span></div>
+                                                <div class="post-cost visible-xs" data-post-cost="{{ post.cost }}"><span class="cost" style=" font-size: 10vw; font-weight: 900;"></span><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;XAF{% if post.subcategory.name == 'Terrain' or post.subcategory == 'Field'  %}/m<sup>2</sup>{% endif %}</span></div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                {% endfor %}
+             </div>
+            {#Modal declaration : BEGIN#}
+                <div class="modal fade" id="post-added" tabindex="-1" role="dialog">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content modal-info" style="background-image: url({% static 'daraja/img/architecture-entreprise.jpg' %});">
+                            <div class="modal-body text-center">
+                                <h4 id="thanks-msg" style="color: #fff;">{% blocktrans %}Your post has been successfully added.{% endblocktrans %}</h4>
+                            </div>
+                            <div>
+                                <div class="actions">
+                                    <div class="col-xs-12 col-sm-4 col-md-3 pull-right action">
+                                        <button class="btn btn-default btn-block btn-sm" data-dismiss="modal" aria-label="OK">{% trans "OK" %}</button>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {#Modal declaration : END#}
+            <div class="clearfix"></div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <footer class="footer">
+        <div class="container footer-container">
+            <div class="row footer-row-1">
+                <div class="col-sm-3 logo-container">
+                    <a href="{% url 'home' %}">
+                        <img class="footer-logo" src="{% static 'enfinchezmoi/img/logo_enfinchezmoiii_noir_sur_blanc.png' %}"/>
+                        <h4 class="logo footer-title">{{ service.project_name }}</h4>
+                    </a>
+                </div>
+                <div class="col-sm-3 col-xs-4">
+                    <h5>{% trans 'Get started' %}</h5>
+                    <ul>
+                        <li><a href="{% url 'home' %}">{% trans 'Home' %}</a></li>
+                        <li><a href="{% url 'ikwen:sign_in' %}?next={% url 'home' %}">{% trans 'Sign In' %}</a></li>
+                    </ul>
+                </div>
+                <div class="col-sm-3 col-xs-4">
+                    <h5>{% trans 'About us' %}</h5>
+                    <ul>
+                        <li style="margin-bottom: 10px;"><a href="#" target="_blank">{% trans 'Our Company' %}</a></li>
+                        {% include 'enfinchezmoi/snippets/language_switcher.html' %}
+{#                        <li><a href="{% url 'enfinchezmoi:about_us' %}" target="_blank">{% trans 'Our Company' %}</a></li>#}
+                    </ul>
+                </div>
+                <div class="col-sm-3 col-xs-4 contact-us">
+                    <h5>Contact us</h5>
+                    <ul>
+                        <li class="col-sm-3 col-xs-12">
+                            <a class="social-share facebook btn btn-block" target="_blank"  href="https://www.facebook.com/Enfichezmoiii/">
+                                <i class="fab fa-facebook"></i>
+                            </a>
+                        </li>
+                        <li class="col-sm-3 col-xs-12">
+                            <a class="social-share twitter btn btn-block" target="_blank"  data-target="#twitter-share" href="https://twitter.com/enfinchezmoiii" style="color: #1da1f2;">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                        </li>
+                        <li class="col-sm-3 col-xs-12">
+                            <a class="social-share instagram btn btn-block" target="_blank"  data-target="#instagram-share" href="https://www.instagram.com/enfinchezmoiii/">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        </li>
+                        <li class="col-sm-3 col-xs-12">
+                            <a class="social-share youtube btn btn-block" target="_blank" data-target="#youtube-share" href="https://www.youtube.com/channel/UCjLAGN-ozEjbHI3PG4X5x7g/" style="color: #c4302b;">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                        </li>
+                        <li class="col-xs-12">
+                            <button class="social-share whatsapp btn btn-block visible-xs" data-target="#whatsapp-share">
+                                <i class="fab fa-whatsapp"></i>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-copyright ">
+                &copy; {{ year }} <a class="company-name" href="{{ service.url }}"><strong>{{ config.company_name }}</strong></a>.{% trans "All rights reserved." %}
+            </div>
+        </div>
+    </footer>
+    {% include 'enfinchezmoi/snippets/edge_panel.html' %}
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src="{% static 'ikwen/swiper/js/swiper.min.js' %}"></script>
+
+    <!-- Initialize Swiper -->
+    <script>
+        var swiper = new Swiper('.swiper-container', {
+            effect: 'coverflow',
+            grabCursor: true,
+            centeredSlides: true,
+            slidesPerView: 'auto',
+            coverflowEffect: {
+                rotate: 50,
+                stretch: 0,
+                depth: 100,
+                modifier: 1,
+                slideShadows: true,
+            },
+            pagination: {
+                el: '.swiper-pagination',
+            },
+        });
+    </script>
+    <script>
+        ( () => {
+            $('#navbar-search').hide();
+            $('body .show-search').hide();
+            $('.button-search').click(() => {
+               $('body .show-search').show()
+            });
+            $('.navbar-menu li.dropdown').on({
+               mouseenter: function () {
+                   $(this).find('i').toggleClass("fa-angle-down fa-angle-up");
+                },
+                mouseleave: function () {
+                    $(this).find('i').toggleClass("fa-angle-down fa-angle-up");
+                }
+            });
+
+           let area = ".area-in-" + $("#rent [id^='town']").val(),
+               area2 = ".area-in-" + $("#purchase [id^='town']").val();
+
+            initial_area_list(area);
+            initial_area_list(area2);
+
+            $("#rent [id^='town']").on({
+                change: function (){
+                    select_matching_area_list(this);
+                }
+            });
+
+            $("#purchase [id^='town']").on({
+                change: function (){
+                    select_matching_area_list(this);
+                }
+            });
+
+            $('.rental-checkbox').on('click, change', function () {
+                let names = "";
+                $.each($(this).parents('.form-group').toArray(), function (index, element) {
+                    if($(element).val()){
+                        names += $(element).name + ',';
+                    }
+                });
+                console.log(names);
+                $(this).parents('.form-group').find('.subcategory').val(names);
+            });
+
+            $('.post-cost').each(function (i, element) {
+               let post_cost = $(element).data('post-cost');
+               $(element).find('.cost').text(post_cost.formatMoney(0, "{{ settings.THOUSAND_SEPARATOR }}"));
+            });
+
+            function initial_area_list(area) {
+                $(area).each(function (i, element) {
+                    if(i===0){
+                        let first_value = $(element).val();
+                        $(element).parent().val(first_value);
+                    }
+                    $(element).show();
+                });
+            }
+
+            function select_matching_area_list(arg) {
+                let area = ".area-in-" + $(arg).val();
+                $("[class^='area']:not(area)").each(function (i, element) {
+                    $(element).hide();
+                });
+                initial_area_list(area);
+            }
+
+            {% if post_added %}
+                $('#post-added').modal({backdrop: 'static'});
+            {% endif %}
+        })()
+    </script>
+
+{% endblock %}
+

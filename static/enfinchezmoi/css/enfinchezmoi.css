@@ -1,0 +1,185 @@
+/**
+    Document   : enfinchezmoi
+    Created on : Nov 08, 2019, 11:14
+    Contributors     : Silatchom SIAKA
+    Description:
+        Enfinchezmoi extra styles
+*/
+
+/*@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,900&display=swap');*/
+@import url('https://fonts.googleapis.com/css?family=Montserrat:300,400|Open+Sans:300,400,600|Raleway|Source+Sans+Pro:300,400,600,700,900&display=swap');
+
+.icon-bar {background: #e74c3c!important;}
+.menu-button {padding: 20px 15px 0 10px!important;}
+.navbar-header .navbar-brand {
+    /*padding-top: 10px!important;*/
+}
+
+.navbar-default.navbar-static-top {background: #ffffff;}
+
+.navbar-default .navbar-nav>li>a {color: #464646!important;}
+
+.navbar-default .navbar-nav>.open>a, .navbar-default .navbar-nav>.open>a:hover, .navbar-default .navbar-nav>.open>a:focus{background-color: #eee!important;}
+
+.navbar-default .navbar-brand {color: #e74c3c;}
+
+#navbar .navbar-brand.visible-xs {max-width: none;}
+
+#navbar .glyphicon {color: #fc9c3a;}
+.navbar-menu .dropdown:hover .dropdown-menu.dropdown-content {display: block!important;}
+
+.navbar-menu .dropdown-menu.dropdown-content {display: none!important; left: 0!important;}
+
+.navbar-menu .dropdown-menu a {padding: 12px 20px !important;}
+
+.navbar-menu .dropdown:hover {background: #fc9c3a;}
+
+#navbar-search input {background: #ababac85!important;}
+
+.categories-links-xs {color: #464646!important;}
+
+#site-menu .navbar-menu .navbar-nav {margin: 0 auto; text-align: center;}
+#site-menu .navbar-nav.navbar-right {margin: 0 -15px 0 0;}
+#user-home .label {margin-top: -18px}
+
+
+/*{#.nav>li>a {#}*/
+/*{#    padding: 19.5px 20px;#}*/
+/*{#}#}*/
+
+.nav-tabs li>a {color: #fff;}
+.contact-owner .nav-tabs>li>a {border-radius: 0}
+
+.nav-tabs a.active, .nav-tabs li>a:hover {color: #464646;}
+
+.search-header .nav-item:not(.active) {background: #222222ba; border-bottom: 1px solid #ecf0f1; border-right: 1px solid #ecf0f1; border-bottom-color: transparent; border-radius: 4px 4px 0 0;}
+
+.search-header .nav-item:hover {border: none;}
+
+.contact-owner .nav-item .navbar-link {border-right: 1px solid #ecf0f1; border-bottom-color: transparent; border-radius: 4px 4px 0 0!important;}
+.contact-owner .nav-item.active .navbar-link {background: #222222ba!important; color: #fff!important;}
+
+.contact-owner .nav-item:not(.active) .navbar-link {background: none!important; color: #464646!important; }
+
+
+
+.banner .info {margin-left: 10px;}
+
+.banner-top {background-image: url(../../enfinchezmoi/img/Olympia2_BackgroundImage_default1.jpg); background-repeat: no-repeat; background-blend-mode: luminosity; height: 850px; color: #fff!important; background-color: rgb(1,0,9);}
+.centered-container {padding-top: 150px; float: none; margin: auto;}
+.search-header {float: none; margin: auto; text-align: center; position: static;}
+.search-header h2 {margin-bottom: 30px; line-height: 50px;}
+.search-body {color: #464646; background: #fff; padding:20px 5px;}
+.post {padding-bottom: 30px; padding-top: 30px;}
+.post-ad {margin: 10px; background: #e74c3c; border: #e74c3c;}
+.post-ad:hover , .search-house:hover, .continue-estimation:hover {background-color: #ab2012; border-color: #ab2012}
+/*.carousel-inner {width: 1030px; height: 687px;}*/
+.carousel-control {width: 10%;}
+.carousel-inner .item {height: 715px;}
+.carousel-inner .side-image {-webkit-background-size: cover; background-size: cover; background-repeat: no-repeat; height: 100%; background-position: center;-ms-filter: blur(8px); filter: blur(8px);}
+.centered-image {
+    background-repeat: no-repeat;
+    -webkit-background-size: cover;
+    background-size: cover;
+    float: none;
+    height: 100%;
+    width: 70%;
+    text-align: center;
+    margin: auto;
+    z-index: 3;
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0, 0.4); /* Black w/opacity/see-through */;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+}
+.contact-owner .header {background-color: rgba(216, 216, 216, 0.2)}
+.contact-owner .header {float: none; margin: auto; text-align: center; position: static;}
+.contact-owner .header>h2 {margin-top: 0; margin-bottom: 0; line-height: 50px; padding: 30px 0 50px;}
+.contact-owner .body {color: #464646; padding:20px 5px;}
+.contact-owner .body form .form-row {padding: 0 12px}
+.post-detail {margin-top: 20px; margin-bottom: 50px}
+.contact-owner {margin-top: 50px;}
+.contact-owner .header .nav-item {width: 50%}
+.contact-owner #call>h3 {padding: 20px 0;}
+.contact-owner .tab-pane {min-height: 500px; height: 500px;}
+#email-message {height: 200px}
+.navbar-link {margin-right: 0!important;}
+
+.owner-request a {color: #e74c3c;}
+.search-house-container {float: none; margin: 5vh auto auto;}
+.search-house, .continue-estimation {background: #e74c3c; border: #e74c3c;}
+.item-image {height: 250px!important; -webkit-background-size: cover!important; background-size: cover!important;}
+.trending-post {font-weight: 900; margin-bottom: 50px;}
+.post .company-description {height: 120px;}
+.post .rooms {height: 50px}
+.error-message {margin: 20vh; text-align: center;}
+.details {padding-left: 0;}
+.property-details {margin: 100px 0}
+
+
+.top-edge-panel a {color: #464646;}
+
+
+/*.post {padding-top: 15px; padding-bottom: 15px;}*/
+.ik-li .info {margin-left: 0;}
+
+#content {margin-bottom: 50px;}
+.contact-us ul * {display: inline;}
+
+.carousel-caption *:not(a) {
+    color: #fff!important;
+}
+
+.post-ad-header{background: url(../../enfinchezmoi/img/maison1.jpg); width: inherit; height: inherit; margin-bottom: 10vh; color: #fff;}
+.post-ad-container {background: rgba(7, 16, 65, 0.8); padding: 30vh; }
+.checkbox-inline:first-of-type {margin-left: 10px;}
+
+.footer {margin: 20px 0 0; opacity: 1; height: 60vh; background: url(../../enfinchezmoi/img/appart8.jpg) center center no-repeat; background-size: cover; font-family: 'Lato','Helvetica Neue',Helvetica,Arial,sans-serif;}
+.footer-container {background: rgba(7,8,21,0.78); z-index: 200; width: inherit; height: inherit;}
+.footer-row-1 {padding-top: 20vh!important;}
+.footer-title {font-size: 2.1vw; color: #ffffff; text-align: center;}
+.logo-container {margin-top: 4vh; text-align: center;}
+.footer-logo {max-width: 10vw;}
+.footer a {text-decoration: none;}
+.footer h5 {color: #ffffff!important; font-weight: bold!important; margin-top: 5vh!important; font-size: 1.8vw}
+.footer ul {line-height: 1.7!important; list-style-type: none!important; padding-left: 0!important;}
+.footer ul li a {color: #d2d1d1!important;}
+.footer ul li{font-size: 1.2vw;}
+.footer .contact-us button.social-share {background: none; padding: 0; margin: 0;}
+.footer .contact-us .social-share.facebook:hover {color: #3b5998!important;}
+.footer .contact-us .social-share.twitter:hover {color: #1da1f2!important;}
+.footer .contact-us .social-share.instagram:hover {color: #c32aa3!important;}
+.footer .contact-us .social-share.youtube:hover {color: #c4302b!important;}
+.footer .footer-copyright {padding: 3px 0!important; text-align: center!important; color: #e74c3c!important;}
+.footer .footer-copyright .company-name strong {color: #ffffff!important;}
+
+
+@media (max-width: 767px) {
+    .footer-row-1 {padding-top: 0vh!important;}
+    .company-list .ik-li ul li {border-bottom: none!important;}
+    .post-ad-container {padding: 15vh 0;}
+    .contact-us ul * {display: block;}
+    .footer-logo {max-width: 20vw;}
+    .footer-title {font-size: 8vw; }
+    .footer h5 {font-size: 5vw}
+    .footer ul li{font-size: 4vw;}
+    .cover-image{width: 500px; height: 300px;}
+    .contact-owner {float: none;}
+    .post-detail {float: none;}
+    .footer .footer-copyright {color: #5c5c5c!important; margin-top: 10vh}
+    .footer .footer-copyright .company-name strong {color: #e74c3c!important;}
+    .error-message {margin: 2vh}
+    .footer {margin: 0; height: 80vh;}
+    .carousel-inner .item {height: 300px;}
+    .property-details {margin: 80px 0}
+}
+
+
+
+@media (max-width: 990px) {
+    .post .company-description {height: auto;}
+    .post .rooms {height: auto}
+    .details {height: 150px;}
+}

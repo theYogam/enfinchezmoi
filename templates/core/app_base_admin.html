@@ -1,0 +1,51 @@
+{% extends 'core/base_admin.html' %}
+
+{% load i18n static humanize user_agents auth_tokens cache %}
+
+{#{% block head_style %}#}
+{#    {{ block.super }}#}
+{#    <style>#}
+{#        .nav>li>a:active, .nav>li>a:focus, .nav>li>a::after {#}
+{#            background: #ecf0f1!important;#}
+{#        }#}
+{#    </style>#}
+{##}
+{#{% endblock %}#}
+
+{% block app_admin_nav %}
+    <div class="divider"></div>
+    <ul class="nav nav-pills nav-stacked">
+        <li role="presentation" class="homepage">
+            <a href="{% url 'enfinchezmoi:post_list' %}" onclick="$(this).css('background','#ecf0f1')">{% trans "Posts" %}</a>
+        </li>
+        <li role="presentation" class="menus">
+            <a href="{% url 'enfinchezmoi:category_list' %}" onclick="$(this).css('background','#ecf0f1')">
+                {% trans "Categories" %}
+            </a>
+        </li>
+        <li role="presentation" class="menus">
+            <a href="{% url 'enfinchezmoi:subcategory_list' %}" onclick="$(this).css('background','#ecf0f1')">
+                {% trans "Subcategories" %}
+            </a>
+        </li>
+        <li role="presentation" class="menus">
+            <a href="{% url 'enfinchezmoi:town_list' %}" onclick="$(this).css('background','#ecf0f1')">
+                {% trans "Towns" %}
+            </a>
+        </li>
+        <li role="presentation" class="menus">
+            <a href="{% url 'enfinchezmoi:area_list' %}" onclick="$(this).css('background','#ecf0f1')">
+                {% trans "Areas" %}
+            </a>
+        </li>
+        <li role="presentation" class="menus">
+            <a href="{% url 'enfinchezmoi:change_owner' %}" onclick="$(this).css('background','#ecf0f1')">
+                {% trans "Create owner" %}
+            </a>
+        </li>
+    </ul>
+{% endblock %}
+
+
+{% block basic_nav %}{% endblock %}
+{% block sudo_nav %}{% endblock %}
