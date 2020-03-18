@@ -71,7 +71,10 @@ class ShowPostList(TemplateView):
 
         subcategory_slug = kwargs.get('subcategory_slug')
         category_slug = kwargs.get('category_slug')
-        category = Category.objects.get(slug=category_slug)
+        try:
+            category = Category.objects.get(slug=category_slug)
+        except:
+            pass
         area = self.request.GET.get('area_rent')
         address = self.request.GET.get('address')
         max_budget = self.request.GET.get('max_budget_rent')
