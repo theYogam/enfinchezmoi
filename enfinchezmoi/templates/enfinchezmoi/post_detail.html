@@ -3,7 +3,7 @@
 {% load static humanize auth_tokens webdesign i18n user_agents staticfiles %}
 
 {% block page_title %}
-    <title>{% blocktrans with category=post.subcategory.category.name subcategory=post.subcategory.name area=post.area.name %}{{ category }} of {{ subcategory }} in {{ area }} at good price{% endblocktrans %}</title>
+    <title>{% blocktrans with category=post.subcategory.category.name subcategory=post.subcategory.name hood=post.hood.name %}{{ category }} of {{ subcategory }} in {{ hood }} at good price{% endblocktrans %}</title>
 {% endblock %}
 
 {% block content %}
@@ -39,15 +39,36 @@
         </div>
         <div class="col-md-7 col-xs-offset-1 pull-left post-detail">
             <div><i class="fas fa-camera" style="font-size: 1.5em;"></i>&nbsp;&nbsp;{{ post.photos|length }} photo(s)&nbsp;&nbsp;|&nbsp;&nbsp;360&deg;</div>
+            <div>
+                <div>
+                    <div class="pull-left hidden-xs">
+                        <h2 style="font-weight: 800">{{ post.subcategory }}</h2>
+                        <span>{{ post.hood }}, {{ post.hood.city }}</span>
+                    </div>
+                    <div class="visible-xs">
+                        <h2 style="font-weight: 800">{{ post.subcategory }}</h2>
+                        <span>{{ post.hood }}, {{ post.hood.city }}</span>
+                    </div>
+                    <div class="pull-right post-cost hidden-xs" data-post-cost="{{ post.cost }}">
+                        <sup style="top: -16px">{{ config.currency_symbol }}&nbsp;</sup><span class="cost" style="font-size: 2.2vw; font-weight: 600;"></span>{% if post.subcategory.name == 'Terrain' or post.subcategory.name == 'Field'  %}&nbsp;/&nbsp;m<sup>2</sup>{% else %}&nbsp;/&nbsp;day{% endif %}
+                        <div style="margin-top: 10px">
+                            <button class="btn btn-block btn-outline-success book-now">{% trans 'Book now' %}</button>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+
             <p style="padding: 50px 0;">{{ post.description }}</p>
             <p>{% blocktrans with ref=post.ref_ad|upper %}Reference of ad: {{ ref }}{% endblocktrans %}</p>
             <div class="property-details">
                 <h4>{% trans 'Property details' %}</h4>
                 <ul>
-                    {% if post.surface_area %}<li><strong>{{ post.surface_area }}</strong> m<sup>2</sup></li>{% endif %}
+                    {% if post.surface %}<li><strong>{{ post.surface }}</strong> m<sup>2</sup></li>{% endif %}
                     {% if post.room_count %}<li>{{ post.room_count }} {% trans 'room(s)' %}</li>{% endif %}
                     {% if post.is_registered %}<li>{% trans 'Registered field' %}</li>{% endif %}
-                    <li>Located at <strong>{{ post.area }}</strong></li>
+                    <li>Located at <strong>{{ post.hood }}</strong></li>
                 </ul>
             </div>
             <div>
@@ -70,16 +91,20 @@
                     </ul>
                 </div>
                 <div class="col-md-4 col-xs-12 details">
-                    <h4>{% trans 'Cost (XAF)' %}</h4>
-                    <div class="post-cost hidden-xs" data-post-cost="{{ post.cost }}"><span class="cost" style="font-size: 2.2vw; font-weight: 600;"></span>{% if post.subcategory.name == 'Terrain' or post.subcategory.name == 'Field'  %}/m<sup>2</sup>{% endif %}</div>
-                    <div class="post-cost visible-xs" data-post-cost="{{ post.cost }}"><span class="cost" style="font-size: 10vw; font-weight: 600;"></span>{% if post.subcategory.name == 'Terrain' or post.subcategory.name == 'Field'  %}/m<sup>2</sup>{% endif %}</div>
+                    <h4>
+                        {% blocktrans with symbol=config.currency_symbol %}
+                            Cost ({{ symbol }})
+                        {% endblocktrans %}
+                    </h4>
+                    <div class="post-cost hidden-xs" data-post-cost="{{ post.cost }}"><span class="cost" style="font-size: 2.2vw; font-weight: 600;"></span>{% if post.subcategory.name == 'Terrain' or post.subcategory.name == 'Field'  %}}&nbsp;/&nbsp;m<sup>2</sup>{% else %}&nbsp;/&nbsp;day{% endif %}</div>
+                    <div class="post-cost visible-xs" data-post-cost="{{ post.cost }}"><span class="cost" style="font-size: 10vw; font-weight: 600;"></span>{% if post.subcategory.name == 'Terrain' or post.subcategory.name == 'Field'  %}}&nbsp;/&nbsp;m<sup>2</sup>{% else %}&nbsp;/&nbsp;day{% endif %}</div>
                 </div>
             </div>
             <div class="clearfix"></div>
         </div>
         <section class="col-md-4 col-xs-12 pull-right contact-owner">
             <div class="header">
-                <h2 class="hidden-xs" style="background-color: #fff;">{% trans "Contact owner" %}</h2>
+                <h3 class="hidden-xs" style="background-color: #fff;">{% trans "Contact owner" %}</h3>
                 <ul class="nav nav-tabs" id="search-tab" role="tablist">
                     <li class="nav-item active">
                         <a class="navbar-link" id="call-tab" data-toggle="tab" href="#call" role="tab" aria-controls="call" aria-selected="true"><i class="fas fa-phone">&nbsp;&nbsp;</i>{% trans "Call" %}</a>
@@ -130,7 +155,7 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="email-message">{% trans "Message :" %}</label>
-                                        <textarea id="email-message"  class="form-control" placeholder="Hi, I would like to own your real estate located at {{ post.area }}" name="email_message"></textarea>
+                                        <textarea id="email-message"  class="form-control" placeholder="Hi, I would like to own your real estate located at {{ post.hood }}" name="email_message"></textarea>
                                     </div>
                                     <div class="form-row col-sm-6 col-xs-12 search-house-container">
                                         <button class="btn btn-primary btn-block search-house request-real-estate"><i class="fas fa-envelope"></i>&nbsp;&nbsp;{% trans "Send" %}</button>
@@ -145,11 +170,11 @@
         </section>
         <div class="clearfix"></div>
         <div class="col-md-offset-1 col-md-9" style="margin-top: 50px;">
-            <h3 class="text-center"  style="margin-bottom: 50px;">{% trans "These might be interest you" %}</h3>
+            <h3 class="text-center"  style="margin-bottom: 50px;">{% trans "You might like these" %}</h3>
             {% for post in related_post_list %}
             <div class="col-md-4" style="padding-bottom: 50px">
                 <div class="post">
-                    <a href="{% url 'enfinchezmoi:post_detail' post.subcategory.category.slug post.subcategory.slug post.area.slug post.id %}">
+                    <a href="{% url 'enfinchezmoi:post_detail' post.subcategory.category.slug post.subcategory.slug post.hood.slug post.id %}">
                         {% if post.photos %}
                             <!-- Swiper -->
                             <div class="swiper-container">
@@ -164,12 +189,12 @@
                         {% endif %}
                     </a>
                     <h3>{{ post.subcategory }}</h3>
-                    <h4 class="rooms">{% if post.room_count > 0 %}{{ post.room_count }} {% trans "room(s)" %} &bullet; {% endif %}{% if post.bedroom_count > 0 %}{{ post.bedroom_count }} {% trans "bedroom(s)" %} &bullet; {% endif %}{% if post.bathroom_count > 0 %}{{ post.bathroom_count }} {% trans "bathroom(s)" %} &bullet; {% endif %}{% if post.surface_area %}{{ post.surface_area }} m<sup>2</sup>{% endif %}</h4>
+                    <h4 class="rooms">{% if post.room_count > 0 %}{{ post.room_count }} {% trans "room(s)" %} &bullet; {% endif %}{% if post.bedroom_count > 0 %}{{ post.bedroom_count }} {% trans "bedroom(s)" %} &bullet; {% endif %}{% if post.bathroom_count > 0 %}{{ post.bathroom_count }} {% trans "bathroom(s)" %} &bullet; {% endif %}{% if post.surface %}{{ post.surface }} m<sup>2</sup>{% endif %}</h4>
                     <p class="company-description">
                         {{ post.description|truncatewords:30|safe }}
                     </p>
-                    <div class="post-cost hidden-xs" data-post-cost="{{ post.cost }}"><span class="cost" style="font-size: 2.2vw; font-weight: 900;"></span><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;XAF{% if post.subcategory.name == 'Terrain' or post.subcategory.name == 'Field'  %}/m<sup>2</sup>{% endif %}</span></div>
-                    <div class="post-cost visible-xs" data-post-cost="{{ post.cost }}"><span class="cost" style="font-size: 10vw; font-weight: 900;"></span><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;XAF{% if post.subcategory.name == 'Terrain' or post.subcategory.name == 'Field'  %}/m<sup>2</sup>{% endif %}</span></div>
+                    <div class="post-cost hidden-xs" data-post-cost="{{ post.cost }}"><sup style="top: -16px">{{ config.currency_symbol }}&nbsp;</sup><span class="cost" style="font-size: 2.2vw; font-weight: 900;"></span><span style="font-size: 16px">&nbsp;&nbsp;{% if post.subcategory.name == 'Terrain' or post.subcategory.name == 'Field'  %}&nbsp;/&nbsp;m<sup>2</sup>{% else %}&nbsp;/&nbsp;day{% endif %}</span></div>
+                    <div class="post-cost visible-xs" data-post-cost="{{ post.cost }}"><sup style="top: -16px">{{ config.currency_symbol }}&nbsp;</sup><span class="cost" style="font-size: 10vw; font-weight: 900;"></span><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;{% if post.subcategory.name == 'Terrain' or post.subcategory.name == 'Field'  %}&nbsp;/&nbsp;m<sup>2</sup>{% else %}&nbsp;/&nbsp;day{% endif %}</span></div>
                 </div>
             </div>
             {% endfor %}
@@ -177,27 +202,57 @@
         <div class="clearfix"></div>
     </div>
     {#    Modal declaration : BEGIN #}
-        <div class="modal fade" id="anonymous-user" tabindex="-1" role="dialog">
+        <div class="modal fade" id="select-period" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
                 <div class="modal-content modal-info">
-                    <div class="modal-body text-center" style="background-image: url({% static 'daraja/img/architecture-entreprise.jpg' %});">
-                        <span id="anonymous-user-msg" class="text-has-shade text-primary">{% blocktrans %}Aww!! It looks like you're not yet login. Please do it before continue...{% endblocktrans %}</span>
-                        <div>
-                            <div class="actions">
-                                <div class="col-xs-12 col-sm-4 col-md-3 pull-right action">
-                                    <a href="{% url 'ikwen:sign_in' %}?next={% url 'enfinchezmoi:post_detail' post.subcategory.category.slug post.subcategory.slug post.area.slug post.pk %}" class="btn btn-success btn-block btn-sm ok search-house">{% trans 'Log in' %}</a>
-                                </div>
-                                <div class="col-xs-12 col-sm-4 col-md-3 pull-right action">
-                                    <button class="btn btn-default btn-block btn-sm" data-dismiss="modal" aria-label="Close">{% trans "Cancel" %}</button>
-                                </div>
-                            </div>
+                    <div class="modal-header text-center">
+                        <h2 class="text-primary" style="font-weight: 800">{% blocktrans %}Select renting period{% endblocktrans %}</h2>
+                    </div>
+                    <div class="modal-body" style="">
+                        <div style="margin: 20px 0">
+                            <label for="start-on">{% trans 'Start on:' %}</label>
+                            <input id="start-on" type="date" class="input-sm form-control">
                             <div class="clearfix"></div>
                         </div>
+                        <div style="margin: 20px 0">
+                            <label for="end-on">{% trans 'End on:' %}</label>
+                            <input id="end-on" type="date" class="input-sm form-control">
+                            <div class="clearfix"></div>
+                        </div>
+                        <p class="tpl error-msg" style="color: orangered; height: 40px">
+                            {% blocktrans with real_estate_name=post.subcategory %}
+                                This {{ real_estate_name }} is not available during your selected period
+                            {% endblocktrans %}
+                            <div class="clearfix"></div>
+                        </p>
+                        <button class="btn btn-sm btn-deep-blue check-availability pull-right">{% trans 'Check availability' %}</button>
+                        <div class="actions tpl">
+                            <div class="col-xs-12 col-sm-4 col-md-3 pull-right action">
+                                <button class="btn btn-success btn-block btn-sm ok payment-start" data-product-id="" data-cost="{{ post.cost }}">{% trans 'Pay' %}</button>
+                            </div>
+                            <div class="col-xs-12 col-sm-4 col-md-3 pull-right action">
+                                <button class="btn btn-default btn-block btn-sm cancel" data-dismiss="modal" aria-label="Close">{% trans "Cancel" %}</button>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
                     </div>
                 </div>
             </div>
         </div>
         {#    Modal declaration : END #}
+        <div class="visible-xs bottom-action has-shade">
+            <div class="post-cost" data-post-cost="{{ post.cost }}">
+                <div class="col-xs-6" style="padding: 20px;">
+                    <sup>{{ config.currency_symbol }}&nbsp;</sup><span class="cost" style="font-size: 5vw; font-weight: 600;"></span>{% if post.subcategory.name == 'Terrain' or post.subcategory.name == 'Field' %}&nbsp;/&nbsp;m<sup>2</sup>{% else %}&nbsp;/&nbsp;day{% endif %}
+                </div>
+                <div class="col-xs-6" style="padding: 10px">
+                    <button class="btn btn-block btn-outline-success book-now">{% trans 'Book now' %}</button>
+                </div>
+            </div>
+        </div>
+    {% with payment_conf='reservation' %}
+        {% include 'billing/snippets/modal_payment_options.html' %}
+    {% endwith %}
 {% endblock %}
 
 {% block js %}
@@ -210,6 +265,39 @@
                     return false;
                 {% endif %}
             });
+            $('.bottom-action *, .book-now').click(function (event) {
+                $('#select-period').modal({backdrop: 'static'});
+                return false;
+            });
+            $('#select-period .modal-body .actions .ok').click(function (event) {
+                $('#select-period').modal('hide');
+            });
+        })()
+    </script>
+    <script>
+        (() => {
+           $('.prompt-login').click(() => {
+               let image = '{% static 'ikwen/img/login-to-proceed.jpg' %}',
+                   title = "{% trans "Login required" %}",
+                   message = "{% trans "Please, you need to login to proceed so that we know who is paying." %}",
+                   url = "{% url 'ikwen:sign_in' %}?next={% url 'enfinchezmoi:post_detail' post.subcategory.category.slug post.subcategory.slug post.hood.slug post.id %}";
+               ikwen.showNoticeDialog(image, title, message, url);
+           });
+           $('#select-period .check-availability').on('click', (e) => {
+               $.getJSON("", {'post_id': '{{ post.pk }}', 'start_on': $('#start-on').val(), 'end_on': $('#end-on').val(), 'action': 'check_availability'}, (data) => {
+                   if (data.success){
+                       $(e.target).hide();
+                       $('#select-period .actions').show();
+                       $('#select-period .error-msg').hide();
+                       $('#select-period .actions .action .ok.payment-start').attr({'data-product-id': data.reservation});
+                       return;
+                   }
+                   $('#select-period .error-msg').show();
+               });
+           });
+           $('#select-period .cancel').on('click', (e) => {
+               $.getJSON("", {'post_id': '{{ post.pk }}', 'start_on': $('#start-on').val(), 'end_on': $('#end-on').val(), 'action': 'cancel_reservation'}, (data) => {});
+           });
         })()
     </script>
 {% endblock %}

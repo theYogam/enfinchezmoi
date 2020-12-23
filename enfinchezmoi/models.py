@@ -1,25 +1,32 @@
 # from django.conf import settings
+import datetime
 import os
 import random
+
+from datetime import datetime
+
+from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db import models
-from django.db.models import Model
+from django.db.models import Model, Q
 from django.template.defaultfilters import slugify
 from django.utils.translation import gettext_lazy as _
 from djangotoolbox.fields import EmbeddedModelField, ListField
 
+from conf.settings import LANGUAGES
+from ikwen.core.constants import PENDING, CONFIRMED
+from ikwen.billing.models import AbstractProduct, AbstractSubscription, AbstractPayment, InvoiceEntry
 from ikwen.accesscontrol.models import Member
 from ikwen.core.models import Country, Model
-from ikwen.core.utils import get_service_instance
 from ikwen.core.fields import MultiImageField
-
-from conf import settings
 
 
 UPLOAD_TO = 'post_images'
 
-LANGUAGES = (
-    ('en', 'English'),
-    ('fr', 'French'),
+BUSY = 'Busy'
+FREE = 'Free'
+STATUS_CHOICES = (
+    (BUSY, _('Busy')),
+    (FREE, _('Free'))
 )
 
 
@@ -29,10 +36,10 @@ class Owner(Model):
     email = models.EmailField(max_length=100)
 
     def __unicode__(self):
-        return self.member
+        return self.member.get_full_name()
 
 
-class Town(Model):
+class City(Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True)
 
@@ -42,11 +49,11 @@ class Town(Model):
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         self.slug = slugify(self.name)
-        super(Town, self).save()
+        super(City, self).save()
 
 
-class Area(Model):
-    town = models.ForeignKey(Town)
+class Hood(Model):
+    city = models.ForeignKey(City)
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True)
 
@@ -56,7 +63,7 @@ class Area(Model):
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         self.slug = slugify(self.name)
-        super(Area, self).save()
+        super(Hood, self).save()
 
 
 class Category(Model):
@@ -87,11 +94,11 @@ class SubCategory(Model):
         super(SubCategory, self).save()
 
 
-class Post(Model):
+class Post(AbstractProduct):
     subcategory = models.ForeignKey(SubCategory)
     owner = models.ForeignKey(Owner, null=True, blank=True)
-    area = models.ForeignKey(Area)
-    surface_area = models.IntegerField(null=True, blank=True, help_text=_('Surface area in meter square'), default=0)
+    hood = models.ForeignKey(Hood)
+    surface = models.IntegerField(null=True, blank=True, help_text=_('Surface hood in meter square'), default=0)
     bedroom_count = models.IntegerField(null=True, help_text=_('Number of bed rooms'))
     bathroom_count = models.IntegerField(null=True, help_text=_('Number of bathrooms'))
     kitchen_count = models.IntegerField(null=True, help_text=_('Number of kitchens'))
@@ -103,16 +110,13 @@ class Post(Model):
     has_cleaning_service = models.BooleanField(blank=True, null=True)
     is_furnished = models.BooleanField(blank=True, null=True)
     is_registered = models.BooleanField(blank=True, null=True)
-    cost = models.IntegerField(null=True, default=0)
     photos = ListField(EmbeddedModelField('Photo'), editable=False, help_text=_('Cover image of the <b>post</b>'),
                        verbose_name=_('Post images'))
     description = models.TextField(blank=True)
     ref_ad = models.CharField(editable=True, max_length=8)
 
-    is_active = models.BooleanField(default=False)
-
     def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
+             update_fields=None, bedroom_count=None, bathroom_count=None, kitchen_count=None, saloon_count=None, cost=None):
 
         if not self.ref_ad:
             alphabet = [chr(ord('A') + i) for i in range(26)]
@@ -127,21 +131,40 @@ class Post(Model):
                 if ref not in [post.ref_ad for post in Post.objects.all()]:
                     self.ref_ad = ref
                     break
+        if not bedroom_count:
+            if self.bedroom_count:
+                self.room_count += int(self.bedroom_count)
+        else:
+            self.room_count += int(bedroom_count)
 
-        self.room_count = self.bedroom_count + self.bathroom_count + self.bedroom_count + \
-                          self.kitchen_count + self.saloon_count
+        if not bathroom_count:
+            if self.bathroom_count:
+                self.room_count += int(self.bathroom_count)
+        else:
+            self.room_count += int(bathroom_count)
 
+        if not kitchen_count:
+            if self.kitchen_count:
+                self.room_count += int(self.kitchen_count)
+        else:
+            self.room_count += int(kitchen_count)
+
+        if not saloon_count:
+            if self.saloon_count:
+                self.room_count += int(self.saloon_count)
+        else:
+            self.room_count += int(saloon_count)
         super(Post, self).save()
 
     def __unicode__(self):
-        area = self.area
+        hood = self.hood
         if not(self.subcategory.slug == 'terrain' and self.subcategory.slug == 'land'):
-            if self.surface_area:
-                return "%s - %s/%s - %d  m2" % (self.subcategory.name, area.town.name, area.name, self.surface_area)
+            if self.surface:
+                return "%s - %s/%s - %d  m2" % (self.subcategory.name, hood.city.name, hood.name, self.surface)
             else:
-                return "%s - %s/%s" % (self.subcategory.name, area.town.name, area.name)
+                return "%s - %s/%s" % (self.subcategory.name, hood.city.name, hood.name)
         else:
-            return "%s - %s/%s - %d bedrooms" % (self.subcategory.name, area.town.name, area.name, self.bedroom_count)
+            return "%s - %s/%s - %d bedrooms" % (self.subcategory.name, hood.city.name, hood.name, self.bedroom_count)
 
     def _get_image(self):
         return self.photos[0].image if len(self.photos) > 0 else None
@@ -165,6 +188,13 @@ class Post(Model):
             photo.delete(*args, **kwargs)
         super(Post, self).delete(*args, **kwargs)
 
+    def is_available(self, start_date, end_date):
+        queryset = Reservation.objects\
+            .filter(Q(start_on__range=(start_date, end_date)) | Q(end_on__range=(start_date, end_date)))\
+            .filter(post=self.pk, status=CONFIRMED)
+
+        return queryset.count() == 0
+
 
 class Photo(models.Model):
     UPLOAD_TO = 'post_images/photos'
@@ -182,3 +212,15 @@ class Photo(models.Model):
 
     def __unicode__(self):
         return self.image.url
+
+
+class Reservation(AbstractPayment):
+    member = models.ForeignKey(Member)
+    post = models.ForeignKey(Post)
+    status = models.CharField(max_length=100, default=PENDING)
+    start_on = models.DateField(blank=True, null=True, help_text=_("Reservation start date."))
+    end_on = models.DateField(blank=True, null=True, help_text=_("Reservation expiry date"))
+    entries = ListField(EmbeddedModelField('InvoiceEntry'), null=True, blank=True)
+
+    def __unicode__(self):
+        return "%s : %s" % (self.post, self.member)

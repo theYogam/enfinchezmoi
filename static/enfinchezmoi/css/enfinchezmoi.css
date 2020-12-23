@@ -96,11 +96,11 @@
 }
 .contact-owner .header {background-color: rgba(216, 216, 216, 0.2)}
 .contact-owner .header {float: none; margin: auto; text-align: center; position: static;}
-.contact-owner .header>h2 {margin-top: 0; margin-bottom: 0; line-height: 50px; padding: 30px 0 50px;}
+.contact-owner .header>h3 {margin-top: 0;margin-bottom: 0;line-height: 50px;padding: 30px 0 30px;}
 .contact-owner .body {color: #464646; padding:20px 5px;}
 .contact-owner .body form .form-row {padding: 0 12px}
 .post-detail {margin-top: 20px; margin-bottom: 50px}
-.contact-owner {margin-top: 50px;}
+.contact-owner {margin-top: 0;}
 .contact-owner .header .nav-item {width: 50%}
 .contact-owner #call>h3 {padding: 20px 0;}
 .contact-owner .tab-pane {min-height: 500px; height: 500px;}
@@ -117,6 +117,78 @@
 .error-message {margin: 20vh; text-align: center;}
 .details {padding-left: 0;}
 .property-details {margin: 100px 0}
+
+.bottom-action {
+    background: #fff;
+    overflow: auto;
+    padding: 0 0;
+    position: fixed;
+    width: 100%;
+    transition: top .3s;
+    height: 65px;
+    z-index: 10000;
+    top: 92vh;
+}
+
+.bottom-action .book-now {
+    /*background:*/
+    /*    var(--dls19-brand-gradient-radial, radial-gradient(circle at center,*/
+    /*      #FF385C 0%,*/
+    /*      #E61E4D 27.5%,*/
+    /*      #E31C5F 40%,*/
+    /*      #D70466 57.5%,*/
+    /*      #BD1E59 75%,*/
+    /*      #BD1E59 100%*/
+    /*    )) !important;*/
+    border: var(--dls19-brand-gradient-radial, radial-gradient(circle at center,
+          #FF385C 0%,
+          #E61E4D 27.5%,
+          #E31C5F 40%,
+          #D70466 57.5%,
+          #BD1E59 75%,
+          #BD1E59 100%
+        )) !important;
+    color: #fff;
+
+    background: #8A2387;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #F27121, #E94057, #8A2387);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #F27121, #E94057, #8A2387); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+}
+
+.bottom-action .book-now:hover {
+    background:
+        var(--dls19-brand-gradient-radial, radial-gradient(circle at center,
+          #FF385C 0%,
+          #E61E4D 27.5%,
+          #E31C5F 40%,
+          #D70466 57.5%,
+          #BD1E59 75%,
+          #BD1E59 100%
+        )) !important;
+    border: var(--dls19-brand-gradient-radial, radial-gradient(circle at center,
+          #FF385C 0%,
+          #E61E4D 27.5%,
+          #E31C5F 40%,
+          #D70466 57.5%,
+          #BD1E59 75%,
+          #BD1E59 100%
+        )) !important;
+
+}
+
+.bottom-action .book-now:after, .bottom-action .book-now:focus {
+    border: var(--dls19-brand-gradient-radial, radial-gradient(circle at center,
+          #FF385C 0%,
+          #E61E4D 27.5%,
+          #E31C5F 40%,
+          #D70466 57.5%,
+          #BD1E59 75%,
+          #BD1E59 100%
+        )) !important;
+    z-index: 0;
+
+}
 
 
 .top-edge-panel a {color: #464646;}
@@ -152,6 +224,7 @@
 .footer .contact-us .social-share.twitter:hover {color: #1da1f2!important;}
 .footer .contact-us .social-share.instagram:hover {color: #c32aa3!important;}
 .footer .contact-us .social-share.youtube:hover {color: #c4302b!important;}
+.footer .contact-us .social-share.linkedin:hover {color: #0e76a8!important;}
 .footer .footer-copyright {padding: 3px 0!important; text-align: center!important; color: #e74c3c!important;}
 .footer .footer-copyright .company-name strong {color: #ffffff!important;}
 
@@ -174,6 +247,9 @@
     .footer {margin: 0; height: 80vh;}
     .carousel-inner .item {height: 300px;}
     .property-details {margin: 80px 0}
+    .banner-top {height: 1000px}
+
+    /*.post-detail {margin: 0; padding: 0}*/
 }
 
 

@@ -2,10 +2,9 @@
 
 {% load static humanize auth_tokens webdesign i18n user_agents staticfiles media_from_provider  %}
 
-{% block page_title %}<title>{% blocktrans %}Owner ! Rent or sell your real estate - Enfinchezmoiii{% endblocktrans %}</title>{% endblock %}
+{% block page_title %}<title>{% blocktrans with project_name=service.project_name %}Owner ! Rent or sell your real estate - {{ project_name }}{% endblocktrans %}</title>{% endblock %}
 {% block head_style %}
     {{ block.super }}
-{#    <link href="{% static 'ikwen/css/admin.css' %}?v=19.10.12" media="screen" rel="stylesheet" type="text/css" />#}
     <link href="{% static 'enfinchezmoi/css/submit_ad.css' %}?v=19.12.19" media="screen" rel="stylesheet" type="text/css" />
     <link rel='stylesheet' href="{% static 'ikwen/swiper/css/swiper.min.css' %}" />
 {% endblock %}
@@ -38,19 +37,19 @@
 
                         {% if error %}<p class="alert alert-danger">{{ error }}</p>{% endif %}
                         <div class="form-group">
-                            <label for="town">{% trans "Town :" %}</label>
-                            <select id="town" class="form-control" name="town">
-                                {% for town in town_list %}
-                                    <option {% if forloop.counter == 1 %}selected{% endif %}>{{ town }}</option>
+                            <label for="city">{% trans "City :" %}</label>
+                            <select id="city" class="form-control" name="city">
+                                {% for city in city_list %}
+                                    <option {% if forloop.counter == 1 %}selected{% endif %}>{{ city }}</option>
                                 {% endfor %}
                             </select>
                              <div class="clearfix"></div>
                         </div>
                         <div class="form-group">
-                            <label for="area">{% trans "Area :" %}</label>
-                            <select id="area" class="form-control" name="area">
-                                {% for area in area_list %}
-                                    <option class="area-in-{{ area.town }} tpl">{{ area }}</option>
+                            <label for="hood">{% trans "Hood :" %}</label>
+                            <select id="hood" class="form-control" name="hood">
+                                {% for hood in hood_list %}
+                                    <option class="hood-in-{{ hood.city }} tpl">{{ hood }}</option>
                                 {% endfor %}
                             </select>
                              <div class="clearfix"></div>
@@ -85,9 +84,9 @@
                             <div class="clearfix"></div>
                         </div>
                         <div class="form-group" style="padding-right: 0;">
-                            <label for="surface-area">{% trans "Surface area :" %}</label>
+                            <label for="surface">{% trans "Surface :" %}</label>
                             <div class="input-group">
-                                <input id="surface-area" type="number" value="30" step="5" class="form-control" name="surface_area">
+                                <input id="surface" type="number" value="30" step="5" class="form-control" name="surface">
                                 <div class="input-group-addon">
                                     <span id="input-group-prepend" class="input-group-text">m<sup>2</sup></span>
                                 </div>
@@ -144,7 +143,7 @@
                         </div>
                         <div class="form-group" style="padding-right: 0;">
                             <label for="cost">{% trans "Cost :" %}</label>
-                            <input id="cost" type="number" value="100000" step="500" class="form-control" name="cost">
+                            <input id="cost" type="number" value="100000" step="500.0" class="form-control" name="cost">
                             <div class="clearfix"></div>
                         </div>
                         <div class="form-group" style="padding-right: 0;">
@@ -200,17 +199,17 @@
 
     <script>
         (() => {
-            let subcategory = ".subcategory-in-" + $("[id^='category']").val(), area = ".area-in-" + $("[id^='town']").val();
+            let subcategory = ".subcategory-in-" + $("[id^='category']").val(), hood = ".hood-in-" + $("[id^='city']").val();
             initial_subcategory_list(subcategory);
-            initial_subcategory_list(area);
+            initial_subcategory_list(hood);
             $("[id^='category']").on({
                 change: function (){
                     select_matching_subcategory_list(this);
                 }
             });
-            $("[id^='town']").on({
+            $("[id^='city']").on({
                 change: function (){
-                    select_matching_area_list(this);
+                    select_matching_hood_list(this);
                 }
             });
             function initial_subcategory_list(subcategory) {
@@ -231,12 +230,12 @@
                 initial_subcategory_list(subcategory);
             }
 
-            function select_matching_area_list(arg){
-                let area = ".area-in-" + $(arg).val();
-                $("[class^='area']:not(area)").each(function (i, element) {
+            function select_matching_hood_list(arg){
+                let hood = ".hood-in-" + $(arg).val();
+                $("[class^='hood']:not(hood)").each(function (i, element) {
                     $(element).addClass('tpl');
                 });
-                initial_subcategory_list(area);
+                initial_subcategory_list(hood);
             }
 
 
@@ -362,8 +361,8 @@
             {% else %}
                 post = getLocalPost();  // Post from an unterminated submit
                 if (post) {
-                    $('#id_town').val(post.town);
-                    $('#id_area').val(post.area);
+                    $('#id_city').val(post.city);
+                    $('#id_hood').val(post.hood);
                     $('#id_category').val(post.category);
                     $('#id_subcategory').val(post.subcategory);
                     $('#id_description').val(post.description);
@@ -372,8 +371,6 @@
                     $('#id_kitchen_count').val(post.kitchen_count);
                     $('#id_saloon_count').val(post.saloon_count);
                     $('#id_has_ac').val(post.has_ac);
-                    $('#id_has_parking').val(post.retail_price);
-                    $('#id_has_parking').val(post.retail_price);
                     $('#id_has_parking').val(post.retail_price);
                     $('#id_is_furnished').val(post.retail_price);
                     $('#id_max_price').val(post.is_furnished);

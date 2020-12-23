@@ -2,33 +2,45 @@ import json
 import logging
 import os
 import sys
-from datetime import datetime
 from threading import Thread
+from datetime import datetime, timedelta
 
 from ajaxuploader.views import AjaxFileUploader
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.contrib.auth.decorators import permission_required
 from django.core.files import File
+from django.core.mail import EmailMessage
+from django.db.models import Sum
 from django.forms import ModelForm
+from django.http.response import Http404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 
+from conf.settings import WALLETS_DB_ALIAS
+from ikwen.billing.utils import get_invoicing_config_instance, get_days_count, get_next_invoice_number, \
+    get_payment_confirmation_message
 from conf import settings
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render
-from django.utils.translation import gettext as _, get_language
+from django.utils.translation import gettext as _, get_language, activate
 from django.views.generic import TemplateView
 from django.http import HttpResponseRedirect, HttpResponse
 
-from ikwen.core.models import Service, Application
-from ikwen.core.views import HybridListView, ChangeObjectBase
-from ikwen.core.utils import get_service_instance, get_model_admin_instance, DefaultUploadBackend, add_event, \
-    XEmailMessage, get_mail_content
+from ikwen.accesscontrol.models import Member
 
-from enfinchezmoi.admin import PostAdmin, TownAdmin, OwnerAdmin, CategoryAdmin, SubCategoryAdmin, AreaAdmin
-from enfinchezmoi.models import Category, SubCategory, Post, Town, Area, Owner, Photo
+from ikwen.core.models import Service, Application
+from ikwen.core.views import HybridListView, ChangeObjectBase, ikwen_service, logger
+from ikwen.core.utils import get_service_instance, get_model_admin_instance, DefaultUploadBackend, add_event, \
+    XEmailMessage, get_mail_content, set_counters, increment_history_field
+from ikwen.core.constants import CONFIRMED
+from ikwen.billing.decorators import momo_gateway_request, momo_gateway_callback
+from ikwen.billing.models import Invoice, MoMoTransaction, Payment, InvoiceItem, InvoiceEntry
+
+from enfinchezmoi.admin import PostAdmin, CityAdmin, OwnerAdmin, CategoryAdmin, SubCategoryAdmin, HoodAdmin, \
+    ReservationAdmin
+from enfinchezmoi.models import Category, SubCategory, Post, City, Hood, Owner, Photo, Reservation
 from enfinchezmoi.forms import SubmitAdForm, OwnerForm
 
 # from conf import settings
@@ -55,8 +67,8 @@ class Home(TemplateView):
         context['service'] = get_service_instance()
 
         context['settings'] = settings
-        context['town_list'] = [post.area.town for post in post_list]
-        context['area_list'] = [post.area for post in post_list]
+        context['city_list'] = [post.hood.city for post in post_list]
+        context['hood_list'] = [post.hood for post in post_list]
         context['post_list'] = list(post_list)
 
         return context
@@ -75,12 +87,12 @@ class ShowPostList(TemplateView):
             category = Category.objects.get(slug=category_slug)
         except:
             pass
-        area = self.request.GET.get('area_rent')
+        hood = self.request.GET.get('hood_rent')
         address = self.request.GET.get('address')
         max_budget = self.request.GET.get('max_budget_rent')
 
-        if not area:
-            area = self.request.GET.get('area_purchase')
+        if not hood:
+            hood = self.request.GET.get('hood_purchase')
             max_budget = self.request.GET.get('max_budget_purchase')
 
         subcategory_list = []
@@ -92,12 +104,12 @@ class ShowPostList(TemplateView):
         if len(subcategory_list) > 0:
             queryset = queryset.filter(subcategory__in=subcategory_list)
 
-        if area:
-            area = Area.objects.get(name=area)
-            queryset = queryset.filter(area=area)
+        if hood:
+            hood = Hood.objects.get(name=hood)
+            queryset = queryset.filter(hood=hood)
         if address:
-            area = Area.objects.get(name=address)
-            queryset = queryset.filter(area=area)
+            hood = Hood.objects.get(name=address)
+            queryset = queryset.filter(hood=hood)
         if max_budget:
             queryset = queryset.filter(cost__lt=max_budget)
         if len(subcategory_list) > 0:
@@ -124,10 +136,42 @@ class ShowPostList(TemplateView):
 class PostDetail(TemplateView):
     template_name = 'enfinchezmoi/post_detail.html'
 
+    def get(self, request, *args, **kwargs):
+        post_id = request.GET.get('post_id')
+        start_on = request.GET.get('start_on')
+        end_on = request.GET.get('end_on')
+        if start_on and end_on:
+            start_on = datetime.strptime(start_on, "%Y-%m-%d")
+            end_on = datetime.strptime(end_on, "%Y-%m-%d")
+            post = get_object_or_404(Post, pk=post_id)
+
+            action = request.GET.get('action')
+
+            if action == 'check_availability':
+                is_available = post.is_available(start_on, end_on)
+                if is_available:
+                    reservation = Reservation.objects.create(post=post, start_on=start_on, end_on=end_on,
+                                                             amount=post.cost, member=self.request.user)
+                    return HttpResponse(json.dumps({'success': is_available, 'reservation': reservation.pk}),
+                                        content_type='application/json')
+
+            if action == 'cancel_reservation':
+                try:
+                    reservation = Reservation.objects.get(post=post, start_on=start_on,
+                                                          end_on=end_on, member=self.request.user)
+                    reservation.delete()
+                except:
+                    pass
+                return HttpResponse(json.dumps({'success': post.is_available(start_on, end_on)}),
+                                    content_type='application/json')
+
+        return super(PostDetail, self).get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super(PostDetail, self).get_context_data(**kwargs)
         post_id = kwargs['post_id']
         post = Post.objects.get(pk=post_id)
+        # post.cost = int(post.cost)
         context['post'] = post
         context['related_post_list'] = Post.objects.filter(subcategory=post.subcategory, is_active=True).exclude(pk=post.pk)
         context['owner'] = post.owner
@@ -147,9 +191,8 @@ class PostDetail(TemplateView):
         name = self.request.POST.get('name')
         email = self.request.POST.get('email')
         phone = self.request.POST.get('phone')
-        admin_list = [admin[1] for admin in settings.ADMINS]
         context = self.get_context_data(**kwargs)
-
+        staff_list = [member.email for member in Member.objects.filter(is_staff=True)]
         if name and email and phone:
             try:
                 html_content = get_mail_content(subject, template_name='enfinchezmoi/mails/send_contacts.html',
@@ -158,8 +201,8 @@ class PostDetail(TemplateView):
                                                                'phone': phone,
                                                                'ref_ad': ref_ad})
 
-                recipient_list = admin_list + [owner.email, owner.member.email, service.member.email,
-                                               service.config.contact_email]
+                recipient_list = [owner.email, owner.member.email, service.member.email, service.config.contact_email]
+                recipient_list += staff_list
                 context['recipient_list'] = recipient_list
                 msg = XEmailMessage(subject, html_content, sender, recipient_list)
                 msg.content_subtype = "html"
@@ -181,8 +224,8 @@ class PostDetail(TemplateView):
                                                            'ref_ad': ref_ad,
                                                            'company_name': company_name,
                                                            'user_message': user_message})
-            recipient_list = admin_list + [owner.email, owner.member.email, service.member.email,
-                                           service.config.contact_email]
+            recipient_list = [owner.email, owner.member.email, service.member.email, service.config.contact_email]
+            recipient_list += staff_list
             context['recipient_list'] = recipient_list
             msg = XEmailMessage(subject, html_content, sender, recipient_list)
             msg.content_subtype = "html"
@@ -233,6 +276,128 @@ class PostPhotoUploadBackend(DefaultUploadBackend):
 post_photo_uploader = AjaxFileUploader(PostPhotoUploadBackend)
 
 
+class Receipt(TemplateView):
+    template_name = 'enfinchezmoi/receipt.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(Receipt, self).get_context_data(**kwargs)
+        config = get_service_instance().config
+        receipt_id = self.kwargs.get('receipt_id')
+        try:
+            reservation = Reservation.objects.select_related('member').get(pk=receipt_id)
+        except Reservation.DoesNotExist:
+            raise Http404("Reservation not found")
+        context['currency_symbol'] = config.currency_symbol
+        context['payment'] = reservation
+        context['member'] = reservation.member
+        context['amount'] = reservation.post.cost
+        context['payment_number'] = get_next_invoice_number()
+        return context
+
+
+@momo_gateway_request
+def set_reservation_checkout(request, *args, **kwargs):
+    """
+    This function has no URL associated with it.
+    It serves as ikwen setting "MOMO_BEFORE_CHECKOUT"
+    """
+    post_id = request.POST['product_id']
+    reservation = Reservation.objects.get(pk=post_id)
+    days = (reservation.end_on - reservation.start_on).days
+    amount = reservation.post.cost * days
+    notification_url = reverse('enfinchezmoi:confirm_reservation_payment', args=(post_id,))
+    post = reservation.post
+    cancel_url = reverse('enfinchezmoi:post_detail', args=(post.subcategory.slug, post.subcategory.category.slug,
+                                                           post.hood.slug, post.id))
+    return_url = reverse('enfinchezmoi:receipt', args=(reservation.id, ))
+    return reservation, amount, notification_url, return_url, cancel_url
+
+
+@momo_gateway_callback
+def confirm_reservation_payment(request, *args, **kwargs):
+    """
+    This view is run after successful user cashout "MOMO_AFTER_CHECKOUT"
+    """
+    tx = kwargs['tx']  # Decoration with @momo_gateway_callback makes 'tx' available in kwargs
+    amount = tx.amount
+    now = datetime.now()
+
+    # Update reservation status --- Confirm reservation
+    reservation_id = tx.object_id
+    reservation = Reservation.objects.get(pk=reservation_id)
+    reservation.processor_tx_id = tx.processor_tx_id
+    reservation.method = Reservation.MOBILE_MONEY
+    reservation.status = CONFIRMED
+    item = InvoiceItem(label=_("Reservation of %s " % reservation.post), amount=reservation.amount)
+    short_description = reservation.start_on.strftime("%Y/%m/%d") + ' - ' + reservation.end_on.strftime("%Y/%m/%d")
+    entry = InvoiceEntry(item=item, short_description=short_description, total=reservation.amount, quantity_unit='')
+    reservation.entries = [entry]
+    reservation.save()
+
+    # Share earnings
+    weblet = get_service_instance(check_cache=False)
+    config = weblet.config
+    ikwen_charges = tx.amount * config.ikwen_share_rate / 100
+    ikwen_share_rate = config.ikwen_share_fixed
+    tx.fees = ikwen_charges
+    tx.save()
+    amount = (100 - ikwen_share_rate) * amount/100
+    weblet.raise_balance(amount, provider=tx.wallet)
+    set_counters(weblet)
+    increment_history_field(weblet, 'turnover_history', amount)
+    increment_history_field(weblet, 'earnings_history', amount)
+    increment_history_field(weblet, 'transaction_count_history')
+
+    member = reservation.member
+
+    # Notify customer and staff
+
+    payer_email = member.email
+    email = config.contact_email
+    if not email:
+        email = weblet.member.email
+    if email or payer_email:
+        subject = _("New reservation of %s done" % reservation.post)
+        try:
+            html_content = get_mail_content(subject, template_name='enfinchezmoi/mails/payment_notice.html',
+                                            extra_context={'currency_symbol': config.currency_symbol,
+                                                           'post': reservation,
+                                                           'payer': member,
+                                                           'tx_date': tx.updated_on.strftime('%Y-%m-%d'),
+                                                           'tx_time': tx.updated_on.strftime('%H:%M:%S')})
+            sender = '%s <no-reply@%s>' % (weblet.project_name, weblet.domain)
+            msg = EmailMessage(subject, html_content, sender, [payer_email])
+            msg.bcc = [email]
+            msg.content_subtype = "html"
+            if getattr(settings, 'UNIT_TESTING', False):
+                msg.send()
+            else:
+                Thread(target=lambda m: m.send(), args=(msg,)).start()
+        except:
+            logger.error("%s - Failed to send notice mail to %s." % (weblet, email), exc_info=True)
+
+    # if member.email:
+    #     activate(member.language)
+    #     invoice_url = ikwen_service.url + reverse('billing:invoice_detail', args=(invoice.id,))
+    #     subject, message, sms_text = get_payment_confirmation_message(payment, member)
+    #     html_content = get_mail_content(subject, message, service=vendor, template_name='billing/mails/notice.html',
+    #                                     extra_context={'member_name': member.first_name, 'invoice': invoice,
+    #                                                    'cta': _("View invoice"), 'invoice_url': invoice_url,
+    #                                                    'early_payment': is_early_payment})
+    #     sender = '%s <no-reply@%s>' % (vendor.config.company_name, ikwen_service.domain)
+    #     msg = XEmailMessage(subject, html_content, sender, [member.email])
+    #     if vendor != ikwen_service and not vendor_is_dara:
+    #         msg.service = vendor
+    #     if invoice_pdf_file:
+    #         msg.attach_file(invoice_pdf_file)
+    #     msg.content_subtype = "html"
+    #     if getattr(settings, 'UNIT_TESTING', False):
+    #         msg.send()
+    #     else:
+    #         Thread(target=lambda m: m.send(), args=(msg,)).start()
+    return HttpResponse("Notification received")
+
+
 class SubmitAd(ChangeObjectBase):
     template_name = 'enfinchezmoi/submit_ad.html'
     model_admin = PostAdmin
@@ -272,8 +437,8 @@ class SubmitAd(ChangeObjectBase):
             context['form'] = form
             context['error'] = error
         context['subcategory_list'] = list(SubCategory.objects.all())
-        context['town_list'] = Town.objects.all()
-        context['area_list'] = Area.objects.all()
+        context['city_list'] = City.objects.all()
+        context['hood_list'] = Hood.objects.all()
         return context
 
     # @method_decorator(csrf_protect)
@@ -282,9 +447,9 @@ class SubmitAd(ChangeObjectBase):
         post_admin = get_model_admin_instance(self.model, self.model_admin)
         form = SubmitAdForm(request.POST)
         if form.is_valid():
-            area = request.POST.get('area')
+            hood = request.POST.get('hood')
             subcategory = request.POST.get('subcategory')
-            surface_area = float(request.POST.get('surface_area'))
+            surface = float(request.POST.get('surface'))
             bedroom_count = request.POST.get('bedroom_count')
             bathroom_count = request.POST.get('bathroom_count')
             kitchen_count = request.POST.get('kitchen_count')
@@ -303,7 +468,7 @@ class SubmitAd(ChangeObjectBase):
             photos_ids = request.POST.get('photos_ids')
             photos_ids_list = photos_ids.strip(',').split(',') if photos_ids else []
 
-            post_area = Area.objects.get(name=area)
+            post_hood = Hood.objects.get(name=hood)
             post_subcategory = SubCategory.objects.get(name=subcategory)
 
             member = request.user
@@ -311,7 +476,10 @@ class SubmitAd(ChangeObjectBase):
             owner_form = OwnerForm({'phone': owner_phone, 'email': owner_email})
 
             if owner_form.is_valid():
-                owner = Owner.objects.create(member=member, phone=owner_phone, email=owner_email)
+                try:
+                    owner = Owner.objects.get(member=member, phone=owner_phone, email=owner_email)
+                except:
+                    owner = Owner.objects.create(member=member, phone=owner_phone, email=owner_email)
             else:
                 context = self.get_context_data(**kwargs)
                 context['model_admin_form'] = owner_form
@@ -322,15 +490,14 @@ class SubmitAd(ChangeObjectBase):
 
             post_owner = owner
 
-            post = Post.objects.create(subcategory=post_subcategory, area=post_area, owner=post_owner)
+            post = Post.objects.create(subcategory=post_subcategory, hood=post_hood, owner=post_owner, cost=cost)
 
             post.description = description
-            post.surface_area = surface_area
+            post.surface = surface
             post.bedroom_count = bedroom_count
             post.bathroom_count = bathroom_count
             post.kitchen_count = kitchen_count
             post.saloon_count = saloon_count
-            post.cost = cost
 
             if has_ac:
                 post.has_ac = has_ac
@@ -350,7 +517,7 @@ class SubmitAd(ChangeObjectBase):
             if is_registered:
                 post.is_registered = is_registered
 
-            post.save()
+            post.save(bedroom_count, bathroom_count, kitchen_count, saloon_count)
 
             post.photos = []
 
@@ -395,24 +562,24 @@ class PostList(HybridListView):
     """
     model = Post
     ordering = ('-id',)
-    list_filter = ('subcategory', 'area', 'surface_area', 'cost', 'owner',)
+    list_filter = ('subcategory', 'hood', 'surface', 'cost', 'owner',)
 
 
-class TownList(HybridListView):
+class CityList(HybridListView):
     """
-    Here is the admin town list view.
+    Here is the admin city list view.
     """
-    model = Town
+    model = City
     ordering = ('name',)
 
 
-class AreaList(HybridListView):
+class HoodList(HybridListView):
     """
-    Here is the admin area list view.
+    Here is the admin hood list view.
     """
-    model = Area
+    model = Hood
     ordering = ('name',)
-    list_filter = ('town',)
+    list_filter = ('city',)
 
 
 class CategoryList(HybridListView):
@@ -438,14 +605,14 @@ class ChangePost(ChangeObjectBase):
     label_field = 'subcategory'
 
 
-class ChangeTown(ChangeObjectBase):
-    model = Town
-    model_admin = TownAdmin
+class ChangeCity(ChangeObjectBase):
+    model = City
+    model_admin = CityAdmin
 
 
-class ChangeArea(ChangeObjectBase):
-    model = Area
-    model_admin = AreaAdmin
+class ChangeHood(ChangeObjectBase):
+    model = Hood
+    model_admin = HoodAdmin
 
 
 class ChangeCategory(ChangeObjectBase):
@@ -463,7 +630,17 @@ class ChangeOwner(ChangeObjectBase):
     model_admin = OwnerAdmin
 
 
+class ChangeReservation(ChangeObjectBase):
+    model = Reservation
+    model_admin = ReservationAdmin
 
 
+class ReservationList(HybridListView):
+    model = Reservation
+    list_filter = ('post', 'start_on', 'end_on', 'status')
+
+
+# class PaymentList(HybridListView):
+#     model = Payment
 
 

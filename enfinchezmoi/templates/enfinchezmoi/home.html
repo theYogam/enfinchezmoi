@@ -7,7 +7,7 @@
     {% include 'core/snippets/colors_and_icons.html' %}
     <meta property="og:url" content="http://www.enfinchezmoiii.com" />
     <meta property="og:image" content="{% static 'enfinchezmoi/img/logo_enfinchezmoiii_rouge_sur_blanc.png' %}" />
-    <meta property="og:title" content="{% trans "Enfinchezmoiii - Real estate agency " %}"/>
+    <meta property="og:title" content="{% blocktrans with project_name=service.project_name %} {{ project_name }} - Real estate agency "{% endblocktrans %}/>
     <meta property="og:description" content="{% trans "An online platform for ads and deposits of real estate in Cameroon." %}">
     <meta property="description" content="{% trans "An online platform for ads and deposits of real estate in Cameroon." %}" />
 {% endblock %}
@@ -18,7 +18,7 @@
 {% block head_style %}
     {{ block.super }}
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
-    <link rel="stylesheet" href="{% static 'enfinchezmoi/css/enfinchezmoi.css' %}">
+    <link rel="stylesheet" href="{% static 'enfinchezmoi/css/enfinchezmoi.css' %}?v=2020.12.23-21.33">
     <link rel="stylesheet" href="{% static 'ikwen/swiper/css/swiper.min.css' %}">
     <link rel="stylesheet" href="{% static 'daraja/css/daraja.css' %}">
 
@@ -284,27 +284,27 @@
                                     <form action="{% url 'enfinchezmoi:show_post_list' %}" >
                                         <div class="form-row">
                                             <div class="form-group col-lg-4 col-md-6 col-xs-12">
-                                                <label for="town-rent">{% trans "Town :" %}</label>
-                                                <select id="town-rent" class="form-control" name="town_rent">
-                                                    {% for town in town_list %}
-                                                        {% if town.area_set.all %}
-                                                            <option {% if forloop.counter == 1 %}selected{% endif %} value="{{ town.slug }}">{{ town }}</option>
+                                                <label for="city-rent">{% trans "city :" %}</label>
+                                                <select id="city-rent" class="form-control" name="city_rent">
+                                                    {% for city in city_list %}
+                                                        {% if city.hood_set.all %}
+                                                            <option {% if forloop.counter == 1 %}selected{% endif %} value="{{ city.slug }}">{{ city }}</option>
                                                         {% else %}
-                                                            <option {% if forloop.counter == 1 %}selected{% endif %} value="none">{{ town }}</option>
+                                                            <option {% if forloop.counter == 1 %}selected{% endif %} value="none">{{ city }}</option>
                                                         {% endif %}
                                                     {% endfor %}
                                                 </select>
                                             </div>
                                             <div class="form-group col-lg-4 col-md-6 col-xs-12">
-                                                <label for="area-rent">{% trans "Area :" %}</label>
-                                                <select id="area-rent" class="form-control" name="area_rent">
-                                                    {% for town in town_list %}
-                                                        {% if town.area_set.all %}
-                                                            {% for area in town.area_set.all %}
-                                                                <option class="area-in-{{ area.town.slug }} tpl">{{ area }}</option>
+                                                <label for="hood-rent">{% trans "hood :" %}</label>
+                                                <select id="hood-rent" class="form-control" name="hood_rent">
+                                                    {% for city in city_list %}
+                                                        {% if city.hood_set.all %}
+                                                            {% for hood in city.hood_set.all %}
+                                                                <option class="hood-in-{{ hood.city.slug }} tpl">{{ hood }}</option>
                                                             {% endfor %}
                                                         {% else %}
-                                                            <option class="area-in-none tpl">-----------------</option>
+                                                            <option class="hood-in-none tpl">-----------------</option>
                                                         {% endif %}
                                                     {% endfor %}
                                                 </select>
@@ -346,27 +346,27 @@
                                     <form action="{% url 'enfinchezmoi:show_post_list' %}" >
                                         <div class="form-row">
                                             <div class="form-group col-lg-4 col-md-6">
-                                                <label for="town-purchase">{% trans "Town :" %}</label>
-                                                <select id="town-purchase" class="form-control" name="town_purchase">
-                                                    {% for town in town_list %}
-                                                        {% if town.area_set.all %}
-                                                            <option {% if forloop.counter == 1 %}selected{% endif %} value="{{ town.slug }}">{{ town }}</option>
+                                                <label for="city-purchase">{% trans "city :" %}</label>
+                                                <select id="city-purchase" class="form-control" name="city_purchase">
+                                                    {% for city in city_list %}
+                                                        {% if city.hood_set.all %}
+                                                            <option {% if forloop.counter == 1 %}selected{% endif %} value="{{ city.slug }}">{{ city }}</option>
                                                         {% else %}
-                                                            <option {% if forloop.counter == 1 %}selected{% endif %} value="none">{{ town }}</option>
+                                                            <option {% if forloop.counter == 1 %}selected{% endif %} value="none">{{ city }}</option>
                                                         {% endif %}
                                                     {% endfor %}
                                                 </select>
                                             </div>
                                             <div class="form-group col-lg-4 col-md-6">
-                                                <label for="area-purchase">{% trans "Area :" %}</label>
-                                                <select id="area-purchase" class="form-control" name="area_purchase">
-                                                    {% for town in town_list %}
-                                                        {% if town.area_set.all %}
-                                                            {% for area in town.area_set.all %}
-                                                                <option class="area-in-{{ area.town.slug }} tpl">{{ area }}</option>
+                                                <label for="hood-purchase">{% trans "hood :" %}</label>
+                                                <select id="hood-purchase" class="form-control" name="hood_purchase">
+                                                    {% for city in city_list %}
+                                                        {% if city.hood_set.all %}
+                                                            {% for hood in city.hood_set.all %}
+                                                                <option class="hood-in-{{ hood.city.slug }} tpl">{{ hood }}</option>
                                                             {% endfor %}
                                                         {% else %}
-                                                            <option class="area-in-none tpl">-----------------</option>
+                                                            <option class="hood-in-none tpl">-----------------</option>
                                                         {% endif %}
                                                     {% endfor %}
                                                 </select>
@@ -405,8 +405,8 @@
                                         <div class="form-group">
                                             <label for="place">{% trans "Address" %}</label>
                                             <select id="input-address" class="form-control" name="address">
-                                                {% for area in area_list %}
-                                                    <option {% if forloop.counter == 1 %}selected{% endif %} value="{{ area }}">{{ area }}, {{ area.town }}</option>
+                                                {% for hood in hood_list %}
+                                                    <option {% if forloop.counter == 1 %}selected{% endif %} value="{{ hood }}">{{ hood }}, {{ hood.city }}</option>
                                                 {% endfor %}
                                             </select>
                                             <div class="clearfix"></div>
@@ -433,7 +433,7 @@
                                     {% if post.subcategory == subcategory %}
                                         <div class="col-md-4" style="padding-bottom: 50px">
                                             <div class="post">
-                                                <a class="" href="{% url 'enfinchezmoi:post_detail' post.subcategory.category.slug post.subcategory.slug post.area.slug post.id %}">
+                                                <a class="" href="{% url 'enfinchezmoi:post_detail' post.subcategory.category.slug post.subcategory.slug post.hood.slug post.id %}">
                                                     {% if post.photos %}
                                                         <!-- Swiper -->
                                                         <div class="swiper-container">
@@ -448,12 +448,12 @@
                                                     {% endif %}
                                                 </a>
                                                 <h3>{{ post.subcategory }}</h3>
-                                                <h4 class="rooms">{% if post.room_count > 0 %}{{ post.room_count }} {% trans "room(s)" %} &bullet; {% endif %}{% if post.bedroom_count > 0 %}{{ post.bedroom_count }} {% trans "bedroom(s)" %} &bullet; {% endif %}{% if post.bathroom_count > 0 %}{{ post.bathroom_count }} {% trans "bathroom(s)" %} &bullet; {% endif %}{% if post.surface_area %}{{ post.surface_area }} m<sup>2</sup>{% endif %}</h4>
+                                                <h4 class="rooms">{% if post.room_count > 0 %}{{ post.room_count }} {% trans "room(s)" %} &bullet; {% endif %}{% if post.bedroom_count > 0 %}{{ post.bedroom_count }} {% trans "bedroom(s)" %} &bullet; {% endif %}{% if post.bathroom_count > 0 %}{{ post.bathroom_count }} {% trans "bathroom(s)" %} &bullet; {% endif %}{% if post.surface %}{{ post.surface }} m<sup>2</sup>{% endif %}</h4>
                                                 <p class="company-description">
                                                     {{ post.description|truncatewords:30|safe }}
                                                 </p>
-                                                <div class="post-cost hidden-xs" data-post-cost="{{ post.cost }}"><span class="cost" style="font-size: 2.2vw; font-weight: 900;"></span><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;XAF{% if post.subcategory.name == 'Terrain' or post.subcategory == 'Field'  %}/m<sup>2</sup>{% endif %}</span></div>
-                                                <div class="post-cost visible-xs" data-post-cost="{{ post.cost }}"><span class="cost" style=" font-size: 10vw; font-weight: 900;"></span><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;XAF{% if post.subcategory.name == 'Terrain' or post.subcategory == 'Field'  %}/m<sup>2</sup>{% endif %}</span></div>
+                                                <div class="post-cost hidden-xs" data-post-cost="{{ post.cost }}"><sup style="top: -16px; font-size: 15px">{{ config.currency_symbol }}&nbsp;</sup><span class="cost" style="font-size: 2.2vw; font-weight: 900;"></span><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;{% if post.subcategory.name == 'Terrain' or post.subcategory == 'Field'  %}/m<sup>2</sup>{% endif %}</span></div>
+                                                <div class="post-cost visible-xs" data-post-cost="{{ post.cost }}"><sup style="top: -16px; font-size: 15px">{{ config.currency_symbol }}&nbsp;</sup><span class="cost" style=" font-size: 10vw; font-weight: 900;"></span><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;{% if post.subcategory.name == 'Terrain' or post.subcategory == 'Field'  %}/m<sup>2</sup>{% endif %}</span></div>
                                             </div>
                                         </div>
                                     {% endif %}
@@ -516,29 +516,29 @@
                     <h5>Contact us</h5>
                     <ul>
                         <li class="col-sm-3 col-xs-12">
-                            <a class="social-share facebook btn btn-block" target="_blank"  href="https://www.facebook.com/Enfichezmoiii/">
+                            <a class="social-share facebook btn btn-block" target="_blank"  href="https://www.facebook.com/Ikwen.SARL/">
                                 <i class="fab fa-facebook"></i>
                             </a>
                         </li>
                         <li class="col-sm-3 col-xs-12">
-                            <a class="social-share twitter btn btn-block" target="_blank"  data-target="#twitter-share" href="https://twitter.com/enfinchezmoiii" style="color: #1da1f2;">
+                            <a class="social-share twitter btn btn-block" target="_blank"  data-target="#twitter-share" href="https://twitter.com/ikwenSARL" style="color: #1da1f2;">
                                 <i class="fab fa-twitter"></i>
                             </a>
                         </li>
                         <li class="col-sm-3 col-xs-12">
-                            <a class="social-share instagram btn btn-block" target="_blank"  data-target="#instagram-share" href="https://www.instagram.com/enfinchezmoiii/">
-                                <i class="fab fa-instagram"></i>
+                            <a class="social-share icon-linkedin share-link btn btn-sm" href="https://www.linkedin.com/company/ikwen/" title="Share on LinkedIn" target="_blank" rel="noopener noreferrer" style="color: #0e76a8;">
+                                <i class="fab fa-linkedin-in"></i>
                             </a>
                         </li>
                         <li class="col-sm-3 col-xs-12">
-                            <a class="social-share youtube btn btn-block" target="_blank" data-target="#youtube-share" href="https://www.youtube.com/channel/UCjLAGN-ozEjbHI3PG4X5x7g/" style="color: #c4302b;">
+                            <a class="social-share youtube btn btn-block" target="_blank" data-target="#youtube-share" href="https://www.youtube.com/channel/UCzhHrosFOA6RC2H9MqR9jxA" style="color: #c4302b;">
                                 <i class="fab fa-youtube"></i>
                             </a>
                         </li>
                         <li class="col-xs-12">
-                            <button class="social-share whatsapp btn btn-block visible-xs" data-target="#whatsapp-share">
+                            <a class="social-share whatsapp btn btn-block visible-xs" href="https://wa.me/690195071">
                                 <i class="fab fa-whatsapp"></i>
-                            </button>
+                            </a>
                         </li>
                     </ul>
                 </div>
@@ -590,21 +590,21 @@
                 }
             });
 
-           let area = ".area-in-" + $("#rent [id^='town']").val(),
-               area2 = ".area-in-" + $("#purchase [id^='town']").val();
+           let hood = ".hood-in-" + $("#rent [id^='city']").val(),
+               hood2 = ".hood-in-" + $("#purchase [id^='city']").val();
 
-            initial_area_list(area);
-            initial_area_list(area2);
+            initial_hood_list(hood);
+            initial_hood_list(hood2);
 
-            $("#rent [id^='town']").on({
+            $("#rent [id^='city']").on({
                 change: function (){
-                    select_matching_area_list(this);
+                    select_matching_hood_list(this);
                 }
             });
 
-            $("#purchase [id^='town']").on({
+            $("#purchase [id^='city']").on({
                 change: function (){
-                    select_matching_area_list(this);
+                    select_matching_hood_list(this);
                 }
             });
 
@@ -624,8 +624,8 @@
                $(element).find('.cost').text(post_cost.formatMoney(0, "{{ settings.THOUSAND_SEPARATOR }}"));
             });
 
-            function initial_area_list(area) {
-                $(area).each(function (i, element) {
+            function initial_hood_list(hood) {
+                $(hood).each(function (i, element) {
                     if(i===0){
                         let first_value = $(element).val();
                         $(element).parent().val(first_value);
@@ -634,12 +634,12 @@
                 });
             }
 
-            function select_matching_area_list(arg) {
-                let area = ".area-in-" + $(arg).val();
-                $("[class^='area']:not(area)").each(function (i, element) {
+            function select_matching_hood_list(arg) {
+                let hood = ".hood-in-" + $(arg).val();
+                $("[class^='hood']:not(hood)").each(function (i, element) {
                     $(element).hide();
                 });
-                initial_area_list(area);
+                initial_hood_list(hood);
             }
 
             {% if post_added %}

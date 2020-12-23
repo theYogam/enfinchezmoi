@@ -2,7 +2,7 @@ from django import forms
 
 
 class SubmitAdForm(forms.Form):
-    surface_area = forms.IntegerField(error_messages={'required': 'Please enter the surface area'}, required=False)
+    surface_hood = forms.IntegerField(error_messages={'required': 'Please enter the surface hood'}, required=False)
     bedroom_count = forms.IntegerField(required=False)
     bathroom_count = forms.IntegerField(required=False)
     kitchen_count = forms.IntegerField(required=False)
@@ -14,7 +14,6 @@ class SubmitAdForm(forms.Form):
     has_cleaning_service = forms.BooleanField(required=False)
     is_furnished = forms.BooleanField(required=False)
     is_registered = forms.BooleanField(required=False)
-    cost = forms.IntegerField(required=False)
     description = forms.TextInput()
 
 

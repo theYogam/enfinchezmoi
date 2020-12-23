@@ -5,16 +5,16 @@
     <title>
         {% if category %}
             {% if subcategory %}
-                {{ category }} - {{ subcategory }} - Enfinchezmoiii
+                {{ category }} - {{ subcategory }} - {{ service.project_name }}
             {% else %}
-                {{ category }} - Enfinchezmoiii
+                {{ category }} -{{ service.project_name }}
             {% endif %}
         {% else %}
             {% with first_post=post_list|first %}
                 {% if post_count != 0 %}
-                    {% blocktrans %}{{ first_post.subcagtegory.category }} of {{ first_post.subcategory }} at {{ first_post.area }} - Enfinchezmoiii{% endblocktrans %}
+                    {% blocktrans with project_name=service.project_name %}{{ first_post.subcagtegory.category }} of {{ first_post.subcategory }} at {{ first_post.hood }} - {{ project_name }}{% endblocktrans %}
                 {% else %}
-                    {% blocktrans %}0 ads match your research yet - Enfinchezmoiii{% endblocktrans %}
+                    {% blocktrans with project_name=service.project_name  %}0 ads match your research yet - {{ project_name }}{% endblocktrans %}
                 {% endif %}
             {% endwith %}
         {% endif %}
@@ -39,7 +39,7 @@
                     {% if forloop.counter < 7 %}
                         <div class="col-md-4" style="padding-bottom: 50px">
                             <div class="post">
-                                <a class="" href="{% url 'enfinchezmoi:post_detail' post.subcategory.category.slug post.subcategory.slug post.area.slug post.id %}">
+                                <a class="" href="{% url 'enfinchezmoi:post_detail' post.subcategory.category.slug post.subcategory.slug post.hood.slug post.id %}">
                                     {% if post.photos %}
                                         <!-- Swiper -->
                                         <div class="swiper-container">
@@ -54,12 +54,12 @@
                                     {% endif %}
                                 </a>
                                 <h3>{{ post.subcategory }}</h3>
-                                <h4 class="rooms">{% if post.room_count > 0 %}{{ post.room_count }} {% trans "room(s)" %} &bullet; {% endif %}{% if post.bedroom_count > 0 %}{{ post.bedroom_count }} {% trans "bedroom(s)" %} &bullet; {% endif %}{% if post.bathroom_count > 0 %}{{ post.bathroom_count }} {% trans "bathroom(s)" %} &bullet; {% endif %}{% if post.surface_area %}{{ post.surface_area }} m<sup>2</sup>{% endif %}</h4>
+                                <h4 class="rooms">{% if post.room_count > 0 %}{{ post.room_count }} {% trans "room(s)" %} &bullet; {% endif %}{% if post.bedroom_count > 0 %}{{ post.bedroom_count }} {% trans "bedroom(s)" %} &bullet; {% endif %}{% if post.bathroom_count > 0 %}{{ post.bathroom_count }} {% trans "bathroom(s)" %} &bullet; {% endif %}{% if post.surface %}{{ post.surface }} m<sup>2</sup>{% endif %}</h4>
                                 <p class="company-description">
                                     {{ post.description|truncatewords:30|safe }}
                                 </p>
-                                <div class="post-cost hidden-xs" data-post-cost="{{ post.cost }}"><span class="cost" style="font-size: 2.2vw; font-weight: 900;"></span><span style="font-size: 16px">&nbsp;&nbsp;XAF{% if post.subcategory.name == 'Terrain' or post.subcategory.name == 'Field'  %}/m<sup>2</sup>{% endif %}</span></div>
-                                <div class="post-cost visible-xs" data-post-cost="{{ post.cost }}"><span class="cost" style="font-size: 10vw; font-weight: 900;"></span><span style="font-size: 16px">&nbsp;&nbsp;XAF{% if post.subcategory.name == 'Terrain' or post.subcategory.name == 'Field'  %}/m<sup>2</sup>{% endif %}</span></div>
+                                <div class="post-cost hidden-xs" data-post-cost="{{ post.cost }}"><span class="cost" style="font-size: 2.2vw; font-weight: 900;"></span><span style="font-size: 16px">&nbsp;&nbsp;{{ config.currency_symbol }}&nbsp;{% if post.subcategory.name == 'Terrain' or post.subcategory.name == 'Field'  %}/m<sup>2</sup>{% endif %}</span></div>
+                                <div class="post-cost visible-xs" data-post-cost="{{ post.cost }}"><span class="cost" style="font-size: 10vw; font-weight: 900;"></span><span style="font-size: 16px">&nbsp;&nbsp;{{ config.currency_symbol }}&nbsp;{% if post.subcategory.name == 'Terrain' or post.subcategory.name == 'Field'  %}/m<sup>2</sup>{% endif %}</span></div>
                             </div>
                         </div>
                     {% endif %}
@@ -72,7 +72,7 @@
                     <div class="col-md-offset-1 col-xs-offset-0">
                         <div class="post">
                             <div class="col-lg-3 col-md-6 col-sm-7 col-xs-12 text-center">
-                                <a class="" href="{% url 'enfinchezmoi:post_detail' post.subcategory.category.slug post.subcategory.slug post.area.slug post.id %}">
+                                <a class="" href="{% url 'enfinchezmoi:post_detail' post.subcategory.category.slug post.subcategory.slug post.hood.slug post.id %}">
                                     {% if post.image %}
                                         {% if post.photos %}
                                             <!-- Swiper -->
@@ -95,15 +95,15 @@
                             </div>
                             <div class="col-lg-4 col-md-6 col-sm-7 col-xs-12">
                                 <h3>{{ post.subcategory }}</h3>
-                                <h4>{% if post.room_count > 0 %}{{ post.room_count }} {% trans "room(s)" %} &bullet; {% endif %}{% if post.bedroom_count > 0 %}{{ post.bedroom_count }} {% trans "bedroom(s)" %} &bullet; {% endif %}{% if post.bathroom_count > 0 %}{{ post.bathroom_count }} {% trans "bathroom(s)" %} &bullet; {% endif %}{% if post.surface_area %}{{ post.surface_area }} m<sup>2</sup>{% endif %}</h4>
+                                <h4>{% if post.room_count > 0 %}{{ post.room_count }} {% trans "room(s)" %} &bullet; {% endif %}{% if post.bedroom_count > 0 %}{{ post.bedroom_count }} {% trans "bedroom(s)" %} &bullet; {% endif %}{% if post.bathroom_count > 0 %}{{ post.bathroom_count }} {% trans "bathroom(s)" %} &bullet; {% endif %}{% if post.surface %}{{ post.surface }} m<sup>2</sup>{% endif %}</h4>
                                 <p>
                                     {{ post.description|truncatewords:40|safe }}
                                 </p>
                                 <div class="post-cost hidden-xs" data-post-cost="{{ post.cost }}">
-                                    <span class="cost" style="font-size: 2.2vw; font-weight: 900; display: inline;"></span><span style="font-size: 16px">&nbsp;&nbsp;XAF{% if post.subcategory.name == 'Terrain' or post.subcategory.name == 'Field'  %}/m<sup>2</sup>{% endif %}</span>
+                                    <span class="cost" style="font-size: 2.2vw; font-weight: 900; display: inline;"></span><span style="font-size: 16px">&nbsp;&nbsp;{{ config.currency_symbol }}&nbsp;{% if post.subcategory.name == 'Terrain' or post.subcategory.name == 'Field'  %}}&nbsp;/&nbsp;m<sup>2</sup>{% else %}&nbsp;/&nbsp;day{% endif %}</span>
                                 </div>
                                 <div class="post-cost visible-xs" data-post-cost="{{ post.cost }}">
-                                    <span class="cost" style="font-size: 8vw; font-weight: 900; display: inline;"></span><span style="font-size: 16px">&nbsp;&nbsp;XAF{% if post.subcategory.name == 'Terrain' or post.subcategory.name == 'Field'  %}/m<sup>2</sup>{% endif %}</span>
+                                    <span class="cost" style="font-size: 8vw; font-weight: 900; display: inline;"></span><span style="font-size: 16px">&nbsp;&nbsp;{{ config.currency_symbol }}&nbsp;{% if post.subcategory.name == 'Terrain' or post.subcategory.name == 'Field'  %}}&nbsp;/&nbsp;m<sup>2</sup>{% else %}&nbsp;/&nbsp;day{% endif %}</span>
                                 </div>
                             </div>
                             <div class="clearfix"></div>
