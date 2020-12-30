@@ -5,7 +5,7 @@
 {% block meta %}
 {#    {{ block.super }}#}
     {% include 'core/snippets/colors_and_icons.html' %}
-    <meta property="og:url" content="http://www.enfinchezmoiii.com" />
+    <meta property="og:url" content="{{ service.url }}" />
     <meta property="og:image" content="{% static 'enfinchezmoi/img/logo_enfinchezmoiii_rouge_sur_blanc.png' %}" />
     <meta property="og:title" content="{% blocktrans with project_name=service.project_name %} {{ project_name }} - Real estate agency "{% endblocktrans %}/>
     <meta property="og:description" content="{% trans "An online platform for ads and deposits of real estate in Cameroon." %}">
@@ -83,7 +83,9 @@
                             <a class="navbar-brand hidden-xs" href="{{ service.url }}">
                                 <strong>{{ service.project_name }}</strong>
                             </a>
-                            <a href="{% url 'enfinchezmoi:submit_ad' %}" role="button" class="post-ad btn btn-primary btn-md hidden-xs pull-right" style="-webkit-border-radius: 25px;-moz-border-radius: 25px;border-radius: 25px;"><i class="fas fa-plus-circle"></i>&nbsp;&nbsp;{% trans "Post an Ad"%} </a>
+                            {% if request.user.is_staff %}
+                                <a href="{% url 'enfinchezmoi:submit_ad' %}" role="button" class="post-ad btn btn-primary btn-md hidden-xs pull-right" style="-webkit-border-radius: 25px;-moz-border-radius: 25px;border-radius: 25px;"><i class="fas fa-plus-circle"></i>&nbsp;&nbsp;{% trans "Post an Ad"%} </a>
+                            {% endif %}
                         {% endblock %}
                         {% block site_menu_xs %}
                             <nav class="visible-xs pull-right">

@@ -9,7 +9,7 @@ from enfinchezmoi.views import ShowPostList, PostDetail, SubmitAd, \
 urlpatterns = patterns(
     '',
     # url(r'^aboutUs/$', AboutUs.as_view(), name='about_us'),
-    url(r'^submitAd/$', login_required(SubmitAd.as_view()), name='submit_ad'),
+    url(r'^submitAd/$', permission_required('enfinchezmoi.ik_manage_post')(login_required(SubmitAd.as_view())), name='submit_ad'),
     url(r'^showPosts/$', ShowPostList.as_view(), name='show_post_list'),
 
     url(r'^posts/$', permission_required('enfinchezmoi.ik_manage_post')(PostList.as_view()),

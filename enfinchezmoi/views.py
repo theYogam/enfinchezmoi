@@ -179,7 +179,6 @@ class PostDetail(TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        sender = 'Enfinchezmoiii <no-reply@ikwen.com>'
         user = request.user
         post_id = kwargs['post_id']
         _post = Post.objects.get(pk=post_id)
@@ -187,6 +186,7 @@ class PostDetail(TemplateView):
         subject = _("New request for your ad %s" % _post.ref_ad)
         ref_ad = _post.ref_ad
         service = get_service_instance()
+        sender = '%s <no-reply@ikwen.com>' % service.project_name
 
         name = self.request.POST.get('name')
         email = self.request.POST.get('email')
@@ -305,7 +305,7 @@ def set_reservation_checkout(request, *args, **kwargs):
     reservation = Reservation.objects.get(pk=post_id)
     days = (reservation.end_on - reservation.start_on).days
     amount = reservation.post.cost * days
-    notification_url = reverse('enfinchezmoi:confirm_reservation_payment', args=(post_id,))
+    notification_url = reverse('enfinchezmoi:confirm_reservation_payment', args=(reservation.id,))
     post = reservation.post
     cancel_url = reverse('enfinchezmoi:post_detail', args=(post.subcategory.slug, post.subcategory.category.slug,
                                                            post.hood.slug, post.id))

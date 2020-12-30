@@ -42,7 +42,8 @@ class OwnerAdmin(admin.ModelAdmin):
 
 
 class ReservationAdmin(admin.ModelAdmin):
-    fields = ('product', 'since', 'expiry')
+    fields = ('start_on', 'end_on', 'status')
+    readonly_fields = ('member', 'post')
 
 
 class PaymentAdmin(admin.ModelAdmin):
