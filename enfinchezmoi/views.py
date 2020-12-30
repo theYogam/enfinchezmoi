@@ -152,7 +152,7 @@ class PostDetail(TemplateView):
                 if is_available:
                     reservation = Reservation.objects.create(post=post, start_on=start_on, end_on=end_on,
                                                              amount=post.cost, member=self.request.user)
-                    return HttpResponse(json.dumps({'success': is_available, 'reservation': reservation.pk}),
+                    return HttpResponse(json.dumps({'success': is_available, 'reservation_id': reservation.pk}),
                                         content_type='application/json')
 
             if action == 'cancel_reservation':
@@ -301,15 +301,15 @@ def set_reservation_checkout(request, *args, **kwargs):
     This function has no URL associated with it.
     It serves as ikwen setting "MOMO_BEFORE_CHECKOUT"
     """
-    post_id = request.POST['product_id']
-    reservation = Reservation.objects.get(pk=post_id)
+    reservation_id = request.POST['product_id']
+    reservation = Reservation.objects.get(pk=reservation_id)
     days = (reservation.end_on - reservation.start_on).days
     amount = reservation.post.cost * days
-    notification_url = reverse('enfinchezmoi:confirm_reservation_payment', args=(reservation.id,))
+    notification_url = reverse('enfinchezmoi:confirm_reservation_payment', args=(reservation_id,))
     post = reservation.post
     cancel_url = reverse('enfinchezmoi:post_detail', args=(post.subcategory.slug, post.subcategory.category.slug,
                                                            post.hood.slug, post.id))
-    return_url = reverse('enfinchezmoi:receipt', args=(reservation.id, ))
+    return_url = reverse('enfinchezmoi:receipt', args=(reservation_id, ))
     return reservation, amount, notification_url, return_url, cancel_url
 
 
