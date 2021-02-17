@@ -225,7 +225,8 @@
                             {% endblocktrans %}
                             <div class="clearfix"></div>
                         </p>
-                        <button class="btn btn-sm btn-deep-blue check-availability pull-right">{% trans 'Check availability' %}</button>
+                        <button class="btn btn-sm col-sm-5 btn-deep-blue {% if request.user.is_authenticated %}check-availability{% else %}prompt-login{% endif %} pull-right">{% trans 'Check availability' %}</button>
+                        <button class="btn btn-sm col-sm-5 btn-default cancel-check-availability" data-dismiss="modal" aria-label="Close">{% trans "Cancel" %}</button>
                         <div class="actions tpl">
                             <div class="col-xs-12 col-sm-4 col-md-3 pull-right action">
                                 <button class="btn btn-success btn-block btn-sm ok payment-start" data-product-id="" data-cost="{{ post.cost }}">{% trans 'Pay' %}</button>
@@ -287,6 +288,7 @@
                $.getJSON("", {'post_id': '{{ post.pk }}', 'start_on': $('#start-on').val(), 'end_on': $('#end-on').val(), 'action': 'check_availability'}, (data) => {
                    if (data.success){
                        $(e.target).hide();
+                       $('.cancel-check-availability').hide();
                        $('#select-period .actions').show();
                        $('#select-period .error-msg').hide();
                        $('#select-period .actions .action .ok.payment-start').attr({'data-product-id': data.reservation_id});

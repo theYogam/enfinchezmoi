@@ -65,7 +65,7 @@
 
 .banner .info {margin-left: 10px;}
 
-.banner-top {background-image: url(../../enfinchezmoi/img/Olympia2_BackgroundImage_default1.jpg); background-repeat: no-repeat; background-blend-mode: luminosity; height: 850px; color: #fff!important; background-color: rgb(1,0,9);}
+.banner-top {background-image: url(../../enfinchezmoi/img/Menu-2-Entrée-15-Logement-privé.jpg);background-repeat: no-repeat;background-blend-mode: luminosity;height: 850px;color: #fff!important;background-color: rgb(1,0,9);background-size: cover;}
 .centered-container {padding-top: 150px; float: none; margin: auto;}
 .search-header {float: none; margin: auto; text-align: center; position: static;}
 .search-header h2 {margin-bottom: 30px; line-height: 50px;}
@@ -112,8 +112,9 @@
 .search-house, .continue-estimation {background: #e74c3c; border: #e74c3c;}
 .item-image {height: 250px!important; -webkit-background-size: cover!important; background-size: cover!important;}
 .trending-post {font-weight: 900; margin-bottom: 50px;}
-.post .company-description {height: 120px;}
-.post .rooms {height: 50px}
+.post .category {font-weight: 400}
+.post .company-description {height: 79px; color: #888; line-height: 25px; overflow: hidden; margin-bottom: 22px}
+.post .rooms {height: 45px; line-height: 26px; font-weight: 700; font-size: 16px; color: #222}
 .error-message {margin: 20vh; text-align: center;}
 .details {padding-left: 0;}
 .property-details {margin: 100px 0}
@@ -153,7 +154,6 @@
     background: #8A2387;  /* fallback for old browsers */
     background: -webkit-linear-gradient(to right, #F27121, #E94057, #8A2387);  /* Chrome 10-25, Safari 5.1-6 */
     background: linear-gradient(to right, #F27121, #E94057, #8A2387); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-
 }
 
 .bottom-action .book-now:hover {

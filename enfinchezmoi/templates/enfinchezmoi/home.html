@@ -6,19 +6,18 @@
 {#    {{ block.super }}#}
     {% include 'core/snippets/colors_and_icons.html' %}
     <meta property="og:url" content="{{ service.url }}" />
-    <meta property="og:image" content="{% static 'enfinchezmoi/img/logo_enfinchezmoiii_rouge_sur_blanc.png' %}" />
-    <meta property="og:title" content="{% blocktrans with project_name=service.project_name %} {{ project_name }} - Real estate agency "{% endblocktrans %}/>
+    <meta property="og:image" content="{% static 'enfinchezmoi/img/logo-aloe-hotel-appart.png' %}" />
+    <meta property="og:title" content="{% blocktrans with project_name=service.project_name %} {{ project_name }} - Real estate agency {% endblocktrans %}"/>
     <meta property="og:description" content="{% trans "An online platform for ads and deposits of real estate in Cameroon." %}">
     <meta property="description" content="{% trans "An online platform for ads and deposits of real estate in Cameroon." %}" />
 {% endblock %}
 
-{#{% block page_title %}<title>Enfinchezmoiii - {{ config.slogan }}</title>{% endblock %}#}
-{% block page_title %}<title>{% trans "Enfinchezmoiii - Real estate agency - Home" %}</title>{% endblock %}
+{% block page_title %}<title>{% blocktrans with project_name=service.project_name %} {{ project_name }} - Real estate agency - Home" {% endblocktrans %}</title>{% endblock %}
 
 {% block head_style %}
     {{ block.super }}
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
-    <link rel="stylesheet" href="{% static 'enfinchezmoi/css/enfinchezmoi.css' %}?v=2020.12.23-21.33">
+    <link rel="stylesheet" href="{% static 'enfinchezmoi/css/enfinchezmoi.css' %}?v=2021.02.11-15.15">
     <link rel="stylesheet" href="{% static 'ikwen/swiper/css/swiper.min.css' %}">
     <link rel="stylesheet" href="{% static 'daraja/css/daraja.css' %}">
 
@@ -449,8 +448,8 @@
                                                         </div>
                                                     {% endif %}
                                                 </a>
-                                                <h3>{{ post.subcategory }}</h3>
-                                                <h4 class="rooms">{% if post.room_count > 0 %}{{ post.room_count }} {% trans "room(s)" %} &bullet; {% endif %}{% if post.bedroom_count > 0 %}{{ post.bedroom_count }} {% trans "bedroom(s)" %} &bullet; {% endif %}{% if post.bathroom_count > 0 %}{{ post.bathroom_count }} {% trans "bathroom(s)" %} &bullet; {% endif %}{% if post.surface %}{{ post.surface }} m<sup>2</sup>{% endif %}</h4>
+                                                <h3 class="category">{{ post.subcategory }}</h3>
+                                                <h4 class="rooms">{% if post.room_count > 0 %}{{ post.room_count }} {% trans "room(s)" %} &bullet; {% endif %}{% if post.bedroom_count > 0 %}{{ post.bedroom_count }} {% trans "bedroom(s)" %} &bullet; {% endif %}{% if post.bathroom_count > 0 %}{{ post.bathroom_count }} {% trans "bathroom(s)" %} &bullet; {% endif %}{% if post.surface > 0 %}{{ post.surface }} m<sup>2</sup>{% endif %}</h4>
                                                 <p class="company-description">
                                                     {{ post.description|truncatewords:30|safe }}
                                                 </p>

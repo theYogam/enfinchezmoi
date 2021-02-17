@@ -62,7 +62,10 @@ class Home(TemplateView):
         if post_added:
             context['post_added'] = post_added
 
-        post_list = Post.objects.filter(is_active=True)
+        post_list = []
+        for q in Post.objects.filter(is_active=True):
+            q.cost = int(q.cost)
+            post_list.append(q)
         context = super(Home, self).get_context_data(**kwargs)
         context['service'] = get_service_instance()
 
@@ -127,7 +130,11 @@ class ShowPostList(TemplateView):
 
         queryset = queryset.filter(is_active=True)
 
-        context['post_list'] = queryset
+        post_list = []
+        for q in queryset:
+            q.cost = int(q.cost)
+            post_list.append(q)
+        context['post_list'] = post_list
         context['post_count'] = queryset.count()
         context['all_post_list'] = Post.objects.filter(is_active=True)
         return context
@@ -151,9 +158,11 @@ class PostDetail(TemplateView):
                 is_available = post.is_available(start_on, end_on)
                 if is_available:
                     reservation = Reservation.objects.create(post=post, start_on=start_on, end_on=end_on,
-                                                             amount=post.cost, member=self.request.user)
+                                                             amount=int(post.cost), member=self.request.user)
                     return HttpResponse(json.dumps({'success': is_available, 'reservation_id': reservation.pk}),
                                         content_type='application/json')
+                return HttpResponse(json.dumps({'success': False}),
+                                    content_type='application/json')
 
             if action == 'cancel_reservation':
                 try:
@@ -161,7 +170,7 @@ class PostDetail(TemplateView):
                                                           end_on=end_on, member=self.request.user)
                     reservation.delete()
                 except:
-                    pass
+                    return HttpResponse(json.dumps({'deleted': True}), content_type='application/json')
                 return HttpResponse(json.dumps({'success': post.is_available(start_on, end_on)}),
                                     content_type='application/json')
 
@@ -171,9 +180,13 @@ class PostDetail(TemplateView):
         context = super(PostDetail, self).get_context_data(**kwargs)
         post_id = kwargs['post_id']
         post = Post.objects.get(pk=post_id)
-        # post.cost = int(post.cost)
+        post.cost = int(post.cost)
         context['post'] = post
-        context['related_post_list'] = Post.objects.filter(subcategory=post.subcategory, is_active=True).exclude(pk=post.pk)
+        related_post_list = []
+        for post in Post.objects.filter(subcategory=post.subcategory, is_active=True).exclude(pk=post.pk):
+            post.cost = int(post.cost)
+            related_post_list.append(post)
+        context['related_post_list'] = related_post_list
         context['owner'] = post.owner
         context['request'] = self.request
         return context
@@ -290,7 +303,7 @@ class Receipt(TemplateView):
         context['currency_symbol'] = config.currency_symbol
         context['payment'] = reservation
         context['member'] = reservation.member
-        context['amount'] = reservation.post.cost
+        context['amount'] = int(reservation.post.cost)
         context['payment_number'] = get_next_invoice_number()
         return context
 
@@ -304,7 +317,7 @@ def set_reservation_checkout(request, *args, **kwargs):
     reservation_id = request.POST['product_id']
     reservation = Reservation.objects.get(pk=reservation_id)
     days = (reservation.end_on - reservation.start_on).days
-    amount = reservation.post.cost * days
+    amount = int(reservation.post.cost) * days
     notification_url = reverse('enfinchezmoi:confirm_reservation_payment', args=(reservation_id,))
     post = reservation.post
     cancel_url = reverse('enfinchezmoi:post_detail', args=(post.subcategory.slug, post.subcategory.category.slug,
@@ -623,6 +636,10 @@ class ChangeCategory(ChangeObjectBase):
 class ChangeSubCategory(ChangeObjectBase):
     model = SubCategory
     model_admin = SubCategoryAdmin
+
+
+class OwnerList(HybridListView):
+    model = Owner
 
 
 class ChangeOwner(ChangeObjectBase):

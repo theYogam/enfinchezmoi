@@ -2,7 +2,7 @@ from django.conf.urls import url, patterns
 from django.contrib.auth.decorators import permission_required, login_required
 
 from enfinchezmoi.views import ShowPostList, PostDetail, SubmitAd, \
-    PostList, CityList, HoodList, CategoryList, SubCategoryList, \
+    PostList, CityList, HoodList, CategoryList, SubCategoryList, OwnerList, \
     ChangePost, ChangeCity, ChangeHood, ChangeCategory, ChangeSubCategory, ChangeOwner, post_photo_uploader, \
     ReservationList, ChangeReservation, set_reservation_checkout, confirm_reservation_payment, Receipt
 
@@ -57,7 +57,8 @@ urlpatterns = patterns(
     url(r'^changeSubCategory/(?P<object_id>[-\w]+)/$', permission_required('enfinchezmoi.ik_manage_post')
     (ChangeSubCategory.as_view()), name='change_subcategory'),
 
-
+    url(r'^ownerList/$', permission_required('enfinchezmoi.ik_manage_post')(OwnerList.as_view()),
+        name='owner_list'),
     url(r'^changeOwner/$', permission_required('enfinchezmoi.ik_manage_post')(ChangeOwner.as_view()),
         name='change_owner'),
     url(r'^changeOwner/(?P<object_id>[-\w]+)/$', permission_required('enfinchezmoi.ik_manage_post')(ChangeOwner.as_view()),

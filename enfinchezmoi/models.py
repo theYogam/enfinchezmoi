@@ -38,6 +38,9 @@ class Owner(Model):
     def __unicode__(self):
         return self.member.get_full_name()
 
+    def get_obj_details(self):
+        return "%s - %s" % (self.phone, self.email)
+
 
 class City(Model):
     name = models.CharField(max_length=200)
@@ -131,29 +134,31 @@ class Post(AbstractProduct):
                 if ref not in [post.ref_ad for post in Post.objects.all()]:
                     self.ref_ad = ref
                     break
+        room_count = 0
         if not bedroom_count:
             if self.bedroom_count:
-                self.room_count += int(self.bedroom_count)
+                room_count += int(self.bedroom_count)
         else:
-            self.room_count += int(bedroom_count)
+            room_count += int(bedroom_count)
 
         if not bathroom_count:
             if self.bathroom_count:
-                self.room_count += int(self.bathroom_count)
+                room_count += int(self.bathroom_count)
         else:
-            self.room_count += int(bathroom_count)
+            room_count += int(bathroom_count)
 
         if not kitchen_count:
             if self.kitchen_count:
-                self.room_count += int(self.kitchen_count)
+                room_count += int(self.kitchen_count)
         else:
-            self.room_count += int(kitchen_count)
+            room_count += int(kitchen_count)
 
         if not saloon_count:
             if self.saloon_count:
-                self.room_count += int(self.saloon_count)
+                room_count += int(self.saloon_count)
         else:
-            self.room_count += int(saloon_count)
+            room_count += int(saloon_count)
+        self.room_count = room_count
         super(Post, self).save()
 
     def __unicode__(self):
